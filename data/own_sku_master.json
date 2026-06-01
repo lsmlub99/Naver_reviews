@@ -1,0 +1,68 @@
+[
+  {
+    "sku_id": "laser_uv_sunscreen_50ml",
+    "name": "레이저 UV 썬스크린 50ml",
+    "series": "레이저 UV",
+    "category": "선크림",
+    "volume_ml": 50,
+    "official_price": 43000,
+    "status": "active",
+    "own_query": "셀퓨전씨 레이저 UV 썬스크린",
+    "market_query": "선크림 SPF50 50ml"
+  },
+  {
+    "sku_id": "laser_uv_pore_serum_40ml",
+    "name": "레이저 UV 포어 썬 세럼 40ml",
+    "series": "레이저 UV",
+    "category": "선세럼",
+    "volume_ml": 40,
+    "official_price": 17800,
+    "status": "active",
+    "own_query": "셀퓨전씨 레이저 UV 포어 썬 세럼",
+    "market_query": "선세럼 SPF50 40ml"
+  },
+  {
+    "sku_id": "aquatica_sunscreen_50ml",
+    "name": "아쿠아티카 쿨링 썬스크린 50ml",
+    "series": "아쿠아티카",
+    "category": "선크림",
+    "volume_ml": 50,
+    "official_price": 42000,
+    "status": "active",
+    "own_query": "셀퓨전씨 아쿠아티카 썬스크린",
+    "market_query": "수분 선크림 SPF50 50ml"
+  },
+  {
+    "sku_id": "aquatica_spray_100ml",
+    "name": "아쿠아티카 썬 스프레이 100ml",
+    "series": "아쿠아티카",
+    "category": "선스프레이",
+    "volume_ml": 100,
+    "official_price": 25000,
+    "status": "active",
+    "own_query": "셀퓨전씨 아쿠아티카 스프레이",
+    "market_query": "선스프레이 SPF50 100ml"
+  },
+  {
+    "sku_id": "blemish_toning_sunscreen_50ml",
+    "name": "잡티 토닝 썬스크린 50ml",
+    "series": "잡티 토닝",
+    "category": "선크림",
+    "volume_ml": 50,
+    "official_price": 43500,
+    "status": "active",
+    "own_query": "셀퓨전씨 잡티 토닝 썬스크린",
+    "market_query": "톤업 선크림 SPF50 50ml"
+  },
+  {
+    "sku_id": "derma_relief_sunscreen_50ml",
+    "name": "더마 릴리프 썬스크린 50ml",
+    "series": "더마 릴리프",
+    "category": "선크림",
+    "volume_ml": 50,
+    "official_price": 35000,
+    "status": "active",
+    "own_query": "셀퓨전씨 더마 릴리프 썬스크린",
+    "market_query": "민감성 선크림 SPF50 50ml"
+  }
+]

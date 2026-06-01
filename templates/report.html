@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>{{ report_title }} — {{ report_date }}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1b2c4f; --navy2:#243460; --navy-light:#e8ecf4;
+  --gold:#c09a5a; --gold-light:#e8d5aa; --gold-bg:#fdf8f0;
+  --cream:#f8f6f2; --white:#fff;
+  --text:#1b2c4f; --muted:#6b7685; --border:#e4e0d8;
+  --green:#15803d; --green-bg:#dcfce7;
+  --red:#b91c1c;   --red-bg:#fee2e2;
+  --amber:#92400e; --amber-bg:#fef9c3;
+  --blue-bg:#eef1f8; --blue-border:#c5cfe8;
+  --shadow:0 2px 16px rgba(27,44,79,.07);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+     background:var(--cream);color:var(--text);font-size:14px;line-height:1.65}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);display:flex;align-items:stretch;padding:0 40px}
+.hdr-brand{padding:24px 28px 24px 0;border-right:1px solid rgba(255,255,255,.1);margin-right:28px;flex-shrink:0}
+.hdr-co{font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:3px}
+.hdr-brand-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em}
+.hdr-center{flex:1;display:flex;align-items:center}
+.hdr-title{font-size:15px;font-weight:600;color:rgba(255,255,255,.7)}
+.hdr-right{display:flex;align-items:center;padding:24px 0}
+.hdr-date .dl{font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:2px}
+.hdr-date .dv{font-size:13px;font-weight:600;color:var(--gold-light)}
+.gold-bar{height:3px;background:linear-gradient(90deg,var(--navy2),var(--gold),var(--gold-light),var(--gold),var(--navy2))}
+
+/* ── STICKY INFO BANNER ── */
+.info-banner{position:sticky;top:0;z-index:100;background:rgba(27,44,79,.97);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,.08);padding:8px 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ib-item{font-size:11px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:5px}
+.ib-item strong{color:var(--gold-light);font-weight:600}
+.ib-sep{color:rgba(255,255,255,.2);font-size:10px}
+.tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+.tooltip-icon{width:14px;height:14px;background:rgba(255,255,255,.2);border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff;cursor:help;flex-shrink:0}
+.tooltip-box{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#fff;color:var(--text);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;font-size:12px;line-height:1.6;width:240px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200}
+.tooltip-wrap:hover .tooltip-box{display:block}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 60px}
+.section{margin-bottom:32px}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.sec-title{font-size:15px;font-weight:700;color:var(--navy)}
+.sec-sub{font-size:11px;color:var(--muted);margin-left:auto}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:20px 24px;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* ── HERO ── */
+.hero{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:16px;margin-bottom:20px}
+.hero-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);
+  padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.hero-card.c-blue::before{background:var(--navy)}
+.hero-card.c-gold::before{background:var(--gold)}
+.hero-card.c-green::before{background:var(--green)}
+.hero-card.c-insight{background:var(--navy);border-color:transparent}
+.hero-label{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.hero-card.c-insight .hero-label{color:var(--gold)}
+.hero-value{font-size:28px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:4px}
+.hero-value.pos{color:var(--green)}
+.hero-value.neg{color:var(--red)}
+.hero-card.c-insight .hero-value{color:#fff;font-size:14px;line-height:1.7;font-weight:400;margin-top:4px}
+.hero-sub{font-size:11px;color:var(--muted)}
+.hero-card.c-insight .hero-sub{color:rgba(255,255,255,.5);font-size:10px;margin-top:8px}
+
+/* ── TREND CHART ── */
+.chart-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.chart-title{font-size:13px;font-weight:700;color:var(--navy)}
+.chart-note{font-size:11px;color:var(--muted)}
+.top3-badge{font-size:10px;font-weight:700;background:var(--navy);color:var(--gold-light);padding:2px 8px;border-radius:10px;margin-left:auto}
+.chart-wrap{position:relative;height:240px}
+
+/* ── KEYWORD BARS ── */
+.kw-list{display:flex;flex-direction:column;gap:7px}
+.kw-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--cream);border-radius:8px;cursor:default}
+.kw-item.top3{background:var(--navy-light);border:1px solid var(--blue-border)}
+.kw-name{font-weight:700;font-size:13px;width:70px;flex-shrink:0}
+.kw-item-v2{display:block;padding:8px 12px}
+.kw-item-v2 .kw-line1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kw-item-v2 .kw-name{width:auto}
+.kw-item-v2 .kw-line2{font-size:11px;color:var(--muted);margin-top:3px;padding-left:2px}
+.status-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.status-pill .status-pct{font-weight:600;opacity:.8}
+.status-hot{background:#ffe4d6;color:#9a3412}
+.status-up{background:var(--green-bg);color:var(--green)}
+.status-flat{background:#eef0f2;color:var(--muted)}
+.status-down{background:var(--red-bg);color:var(--red)}
+.status-muted{background:#f1f1f1;color:var(--muted)}
+
+.chart-overview{background:var(--cream);border-left:3px solid var(--gold);padding:10px 14px;border-radius:6px;margin:4px 0 14px;font-size:12px;line-height:1.7}
+.co-line{color:var(--navy);font-weight:600}
+.co-line + .co-line{margin-top:2px}
+.co-line:last-child{color:var(--navy2);font-weight:700;margin-top:4px;padding-top:4px;border-top:1px dashed var(--border)}
+
+.hero-story{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.hs-trend{font-size:14px;font-weight:800}
+.hs-trend.status-hot{color:#9a3412}
+.hs-trend.status-up{color:var(--green)}
+.hs-trend.status-flat{color:var(--navy)}
+.hs-trend.status-down{color:var(--red)}
+.hs-interp{font-size:11px;color:var(--muted);font-weight:600}
+.hs-action{font-size:11px;color:var(--navy);font-weight:700}
+
+/* ── OWN PRODUCTS ── */
+.view-mode-bar{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content}
+.view-mode-btn{font-size:12px;font-weight:600;padding:6px 18px;border:none;background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+.view-mode-btn.active{background:var(--navy);color:var(--gold-light)}
+.view-mode-btn:not(:last-child){border-right:1px solid var(--border)}
+.cat-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.cat-tab{font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+.cat-tab.active{background:var(--navy);color:var(--gold-light);border-color:var(--navy)}
+.ctrl-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.sort-bar{display:flex;gap:6px;align-items:center}
+.sort-state-label{font-size:11px;color:var(--muted);margin-right:4px;white-space:nowrap}
+.sort-btn{font-size:11px;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sort-btn.active{background:var(--gold-bg);color:var(--navy);border-color:var(--gold);font-weight:700}
+.expand-ctrl{display:flex;gap:6px;align-items:center}
+.expand-btn{font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+.expand-btn:hover{background:var(--cream)}
+.series-block{margin-bottom:10px}
+.series-hdr{display:flex;align-items:center;gap:10px;background:var(--navy);color:var(--gold-light);padding:9px 16px;border-radius:8px;cursor:pointer;user-select:none}
+.series-name{font-size:13px;font-weight:700;flex:1}
+.series-count{font-size:11px;color:rgba(255,255,255,.5)}
+.series-toggle{font-size:11px;color:rgba(255,255,255,.5);transition:transform .2s;margin-left:4px}
+.series-toggle.open{transform:rotate(180deg)}
+.series-body{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+.series-body.open{display:block}
+.sku-table{width:100%;border-collapse:collapse}
+.sku-table th{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-align:left;padding:9px 14px;background:var(--cream);border-bottom:1px solid var(--border);white-space:nowrap}
+.sku-table th.r{text-align:right}
+.sku-table th.sortable{cursor:pointer;user-select:none}
+.sku-table th.sortable:hover{color:var(--navy)}
+.sku-table th.sort-asc::after{content:" ↑";color:var(--navy)}
+.sku-table th.sort-desc::after{content:" ↓";color:var(--navy)}
+.sku-table td{padding:10px 14px;border-bottom:1px solid var(--cream);vertical-align:middle;font-size:13px}
+.sku-table tr:last-child td{border-bottom:none}
+.sku-name{font-weight:600;color:var(--navy)}
+.sku-vol{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+.sku-cat{font-size:10px;background:var(--cream);color:var(--muted);padding:2px 8px;border-radius:10px;white-space:nowrap}
+.sku-series{font-size:11px;color:var(--muted)}
+.price-val{font-weight:700;text-align:right;white-space:nowrap}
+.no-val{color:var(--muted);font-size:12px;font-style:italic}
+
+/* ── COMPETITOR (v3) ── */
+.comp-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:stretch}
+.comp-block{margin:0;padding:18px 20px}
+.comp-cat-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;
+  padding-bottom:10px;border-bottom:1px solid var(--border)}
+.comp-cat-name{font-size:15px;font-weight:800;color:var(--navy)}
+.comp-our-ml{font-size:11px;color:var(--muted)}
+.comp-our-ml strong{color:var(--navy);font-weight:700}
+.comp-position{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;margin-left:auto}
+.comp-position.pos{background:var(--green-bg);color:var(--green)}
+.comp-position.mid{background:var(--cream);color:var(--muted)}
+.comp-position.neg{background:var(--red-bg);color:var(--red)}
+.comp-criteria{font-size:10px;color:var(--muted);background:var(--cream);padding:2px 9px;border-radius:10px}
+
+.sub-market{margin-top:14px}
+.sm-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.sm-label{font-size:12px;font-weight:800;color:var(--navy);display:inline-flex;align-items:center;gap:6px}
+.sm-label::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.sub-market.risk .sm-label::before{background:var(--red)}
+.sub-market.promo .sm-label::before{background:#a855f7}
+.sm-count{font-size:10px;color:var(--muted)}
+.sm-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--cream);
+  padding:9px 12px;border-radius:8px;margin-bottom:8px}
+.sub-market.risk .sm-summary{background:var(--red-bg)}
+.sm-cell{display:flex;flex-direction:column;gap:2px}
+.sm-cell-label{font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.sm-cell-value{font-size:13px;font-weight:800;color:var(--navy);line-height:1.1}
+.sm-cell-unit{font-size:9px;font-weight:500;color:var(--muted);margin-left:2px}
+
+.comp-rows{display:flex;flex-direction:column;gap:5px}
+.comp-row{display:grid;grid-template-columns:20px 1fr 70px 60px 80px;align-items:center;gap:8px;
+  padding:7px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-size:11.5px}
+.sub-market.risk .comp-row{background:#fff7f7;border-color:#fca5a5}
+.comp-rank{font-size:10px;font-weight:700;color:var(--muted);text-align:center}
+.comp-title{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comp-mall{font-size:10px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-mlprice{font-size:10px;color:var(--navy);font-weight:700;text-align:right;white-space:nowrap}
+.comp-price{font-weight:700;color:var(--navy);text-align:right}
+.comp-empty{font-size:11px;color:var(--muted);padding:10px;background:var(--cream);border-radius:6px;text-align:center}
+.comp-source-note{font-size:11px;color:var(--muted);margin-top:16px;padding:10px 14px;background:var(--cream);border-radius:6px;line-height:1.55}
+/* ── 데이터 신뢰도 배지 ── */
+.reliability-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:10px;white-space:nowrap}
+.rb-high  {background:var(--green-bg);color:var(--green)}
+.rb-medium{background:var(--amber-bg);color:var(--amber)}
+.rb-low   {background:var(--red-bg);color:var(--red)}
+.rb-dot   {width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.data-warn{font-size:11px;font-weight:700;color:var(--red);background:var(--red-bg);
+  padding:6px 10px;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+
+/* ── 포지션 비교 ── */
+.pos-compare{background:var(--cream);border-radius:8px;padding:10px 14px;margin-bottom:10px}
+.pc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pc-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:4px}
+.pc-value{font-size:18px;font-weight:800;color:var(--navy);line-height:1}
+.pc-unit{font-size:10px;font-weight:500;color:var(--muted);margin-left:2px}
+.pc-delta{font-size:13px;font-weight:800;padding:4px 12px;border-radius:8px;white-space:nowrap;align-self:center}
+.pc-delta.pos{background:var(--green-bg);color:var(--green)}
+.pc-delta.mid{background:var(--cream);color:var(--muted);border:1px solid var(--border)}
+.pc-delta.neg{background:var(--red-bg);color:var(--red)}
+
+/* ── 카테고리 자동 인사이트 ── */
+.cat-insight{background:var(--blue-bg);border:1px solid var(--blue-border);
+  border-radius:8px;padding:12px 14px;margin-top:14px}
+.ci-hdr{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--navy);
+  text-transform:uppercase;margin-bottom:8px}
+.ci-problems{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.ci-problem{font-size:11px;color:var(--text);display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.ci-problem::before{content:"•";color:var(--red);font-weight:800;flex-shrink:0}
+.ci-actions{display:flex;flex-direction:column;gap:3px}
+.ci-action{font-size:11px;color:var(--navy);font-weight:700;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.ci-action::before{content:"→";color:var(--gold);flex-shrink:0}
+.ci-no-problem{font-size:11px;color:var(--green);font-weight:600}
+
+.comp-risk-warn{font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px}
+
+/* ── 경쟁사 브랜드 태그 + 포지셔닝 차트 ── */
+.brand-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.brand-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;
+  background:var(--navy-light);color:var(--navy);border:1px solid var(--blue-border)}
+.comp-section-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:var(--cream);border-radius:8px;padding:10px 14px;margin:12px 0}
+.comp-meta-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.comp-meta-item strong{color:var(--navy);font-weight:700}
+
+/* positioning chart */
+.pos-chart-wrap{position:relative;height:170px;margin:12px 0 6px}
+.pos-chart-note{font-size:10px;color:var(--muted);margin-bottom:10px;text-align:right}
+
+/* structure bar */
+.struct-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0 4px;gap:1px}
+.sb-single{background:var(--navy)}
+.sb-promo{background:#a855f7}
+.sb-abnormal{background:var(--red)}
+.struct-legend{display:flex;gap:10px;font-size:10px;color:var(--muted)}
+.sl-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-right:3px}
+
+/* 경쟁사 카드 그리드 1열 */
+.comp-grid{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+
+/* ── INSIGHT CARDS (2×2) ── */
+.insight-card{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;
+  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.insight-col{padding:11px 14px}
+.insight-col:nth-child(1){background:var(--blue-bg);border-bottom:1px solid var(--border)}
+.insight-col:nth-child(2){background:var(--gold-bg);border-left:1px solid var(--border);border-bottom:1px solid var(--border)}
+.insight-col:nth-child(3){background:var(--cream)}
+.insight-col:nth-child(4){background:var(--green-bg);border-left:1px solid var(--border)}
+.insight-col-label{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;color:var(--muted)}
+.insight-col:nth-child(1) .insight-col-label{color:var(--navy)}
+.insight-col:nth-child(2) .insight-col-label{color:#854d0e}
+.insight-col:nth-child(4) .insight-col-label{color:var(--green)}
+.insight-col-text{font-size:12px;line-height:1.55;color:var(--text)}
+
+/* ── 경쟁사 요약 행 ── */
+.comp-summary-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+  margin-top:8px;padding:8px 12px;background:var(--cream);border-radius:8px}
+.csr-item{display:flex;flex-direction:column;align-items:center;min-width:56px}
+.csr-item.warn .csr-val{color:var(--red)}
+.csr-label{font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
+.csr-val{font-size:14px;font-weight:800;color:var(--navy);line-height:1.2}
+
+/* ── 상세 접기/펼치기 ── */
+.comp-detail{display:none}
+.comp-detail.open{display:block}
+.comp-toggle-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;
+  font-size:11px;font-weight:700;color:var(--navy);background:var(--navy-light);
+  border:1px solid var(--blue-border);border-radius:6px;padding:5px 12px;
+  cursor:pointer;user-select:none;transition:background .15s}
+.comp-toggle-btn:hover{background:var(--blue-border)}
+.comp-toggle-icon{font-size:10px;transition:transform .2s}
+.comp-toggle-btn.open .comp-toggle-icon{transform:rotate(180deg)}
+
+/* ── PRIORITY CHECK ── */
+.priority-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.priority-card{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;background:var(--white);display:flex;align-items:center;gap:12px}
+.priority-card.warn{border-color:#fbbf24;background:#fffbeb}
+.priority-card.ok{border-color:#86efac;background:#f0fdf4}
+.priority-count{font-size:22px;font-weight:800;color:var(--navy);min-width:34px;text-align:center;line-height:1}
+.priority-card.warn .priority-count{color:#d97706}
+.priority-card.ok .priority-count{color:var(--green)}
+.priority-body{flex:1}
+.priority-label{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:2px}
+.priority-detail{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* ── BADGES ── */
+.badge-partial{display:inline-block;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:8px;margin-left:6px;white-space:nowrap}
+.chart-partial-note{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:10px;margin-left:8px}
+.badge-comp{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap;cursor:help;position:relative}
+.badge-comp.ok{background:var(--green-bg);color:var(--green)}
+.badge-comp.market_only{background:var(--amber-bg);color:#92400e}
+.badge-comp.no_match{background:var(--red-bg);color:var(--red)}
+.badge-comp.no_source{background:#f1f5f9;color:#475569}
+.badge-comp.verify{background:#ede9fe;color:#6d28d9}
+.lvl-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap}
+.price-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;vertical-align:middle;margin-left:4px;white-space:nowrap}
+.price-badge.observed{background:var(--navy-light);color:var(--navy)}
+.conf-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;vertical-align:middle;margin-left:3px;white-space:nowrap}
+.conf-badge.medium{background:var(--amber-bg);color:var(--amber)}
+.conf-badge.low{background:var(--red-bg);color:var(--red)}
+.sku-src-count{display:inline-block;font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;background:var(--navy-light);color:var(--navy);margin-left:4px;cursor:help}
+.lvl-ok{background:var(--green-bg);color:var(--green)}
+.lvl-mid{background:var(--amber-bg);color:var(--amber)}
+.lvl-high{background:var(--red-bg);color:var(--red)}
+.price-legend{font-size:10px;color:var(--muted);margin-top:8px;padding:6px 10px;background:var(--cream);border-radius:6px;display:inline-block}
+
+/* ── ACTION ITEMS ── */
+.action-list{display:flex;flex-direction:column;gap:8px}
+.action-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--white);border:1px solid var(--border);border-left:3px solid transparent;box-shadow:var(--shadow)}
+.action-item.h{border-left-color:var(--red)}
+.action-item.m{border-left-color:var(--gold)}
+.action-item.l{border-left-color:#94a3b8}
+.action-badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;flex-shrink:0;margin-top:1px;letter-spacing:.04em}
+.action-item.h .action-badge{background:var(--red-bg);color:var(--red)}
+.action-item.m .action-badge{background:var(--amber-bg);color:var(--amber)}
+.action-item.l .action-badge{background:var(--cream);color:var(--muted)}
+.action-body{flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.action-text{font-size:12px;line-height:1.4;flex:1;min-width:0}
+.action-deadline{font-size:11px;color:var(--muted);white-space:nowrap}
+
+.risk-list{display:flex;flex-direction:column;gap:6px}
+.risk-item{display:flex;align-items:center;gap:8px;font-size:12px;background:var(--red-bg);padding:8px 12px;border-radius:8px;color:var(--red)}
+.risk-icon{flex-shrink:0;font-size:13px}
+
+.outlook-box{background:var(--navy);border-radius:var(--radius);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.outlook-label{font-size:10px;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;font-weight:700;flex-shrink:0}
+.outlook-text{font-size:13px;color:rgba(255,255,255,.88);line-height:1.55;flex:1;min-width:200px}
+
+.fallback-card{background:var(--white);border:1px dashed var(--border);border-radius:var(--radius);padding:28px;text-align:center;color:var(--muted);font-size:13px}
+.footer{text-align:center;padding:24px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:8px}
+
+/* ── SKU COVERAGE BAR ── */
+.sku-coverage-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--white);border:1px solid var(--border);border-radius:10px;
+  padding:10px 16px;margin-bottom:14px;font-size:12px}
+.sku-stat{color:var(--muted)}
+.sku-stat strong{color:var(--navy);font-weight:700}
+.sku-stat.match strong{color:var(--green)}
+.sku-stat.nomatch strong{color:var(--red)}
+.sku-unmatched{font-size:11px;color:var(--muted);width:100%;padding-top:6px}
+.sku-unmatched summary{cursor:pointer;color:var(--navy);font-weight:600;font-size:11px}
+.sku-unmatched ul{margin:6px 0 0 14px;display:flex;flex-wrap:wrap;gap:4px 12px}
+.sku-unmatched li{list-style:disc;color:var(--text)}
+.cat-tag{font-size:10px;color:var(--muted);background:var(--cream);border-radius:4px;padding:1px 5px;margin-left:3px}
+
+/* ── SKU STATUS BADGE ── */
+.sku-status-icon{cursor:help;position:relative;display:inline-flex;align-items:center;gap:3px}
+.sku-status-action{font-size:10px;font-weight:700;color:var(--navy);background:var(--navy-light);
+  border-radius:4px;padding:0 4px;cursor:help;position:relative}
+.sku-status-action:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;
+  transform:translateX(-50%);background:#1b2c4f;color:#fff;border-radius:6px;padding:5px 9px;
+  font-size:10px;white-space:nowrap;pointer-events:none;z-index:100;font-weight:400}
+
+/* ── HIGH PRIORITY BADGE ── */
+.hp-badge{display:inline-block;background:#c0392b;color:#fff;font-size:9px;font-weight:800;
+  padding:1px 5px;border-radius:3px;letter-spacing:.04em;flex-shrink:0;align-self:flex-start;margin-top:1px}
+.hp-action{display:flex;gap:5px;align-items:flex-start;margin-bottom:4px}
+.hp-problem{font-size:10px;color:var(--muted);font-weight:400;display:block;margin-top:1px}
+
+/* ── INSIGHT CARD 포지션 레이블 ── */
+.pos-label{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;margin-bottom:5px}
+.pos-label.premium{background:#ede9fe;color:#6d28d9}
+.pos-label.high-price{background:var(--red-bg);color:var(--red)}
+.pos-label.avg{background:var(--green-bg);color:var(--green)}
+.pos-label.low-price{background:var(--blue-bg);color:var(--navy)}
+
+@media(max-width:780px){
+  .hero{grid-template-columns:1fr 1fr}
+  .hero-card.c-insight{grid-column:1/-1}
+  .grid2,.grid3,.comp-grid{grid-template-columns:1fr}
+  .comp-summary{grid-template-columns:repeat(2,1fr)}
+  .insight-card{grid-template-columns:1fr 1fr}
+  .insight-col:nth-child(n+3){border-top:1px solid var(--border)}
+  .insight-col:nth-child(3){border-left:none}
+  .priority-grid{grid-template-columns:1fr}
+  .hdr{flex-direction:column;padding:20px}
+}
+@media print{.info-banner{position:static}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-co">{{ company_name }}</div>
+    <div class="hdr-brand-name">{{ brand_name }}</div>
+  </div>
+  <div class="hdr-center"><div class="hdr-title">{{ report_title }}</div></div>
+  <div class="hdr-right">
+    <div class="hdr-date">
+      <div class="dl">생성일시</div>
+      <div class="dv">{{ generated_at }}</div>
+    </div>
+  </div>
+</div>
+<div class="gold-bar"></div>
+
+<!-- STICKY INFO BANNER -->
+<div class="info-banner">
+  <div class="ib-item"><strong>기간</strong> {{ data_meta.period }}</div>
+  <span class="ib-sep">|</span>
+  <div class="ib-item"><strong>출처</strong> {{ data_meta.source }}</div>
+  <span class="ib-sep">|</span>
+  <div class="ib-item tooltip-wrap">
+    <strong>검색 지수 기준</strong>
+    <span class="tooltip-icon">?</span>
+    <div class="tooltip-box">{{ data_meta.index_note }}</div>
+  </div>
+  <span class="ib-sep">|</span>
+  <div class="ib-item"><strong>경쟁사 기준</strong> {{ data_meta.competitor_note }}</div>
+</div>
+
+<div class="wrap">
+
+<!-- [1] HERO -->
+<div class="section">
+  <div class="hero">
+    <div class="hero-card c-blue">
+      <div class="hero-label">전주 대비 검색 지수</div>
+      {% set avg = market_summary.avg_index_change_pct or 0 %}
+      <div class="hero-value {% if avg > 0 %}pos{% elif avg < 0 %}neg{% endif %}">
+        {% if avg > 0 %}+{% endif %}{{ avg }}%
+      </div>
+      <div class="hero-sub">전 키워드 평균 변화율</div>
+    </div>
+
+    <div class="hero-card c-gold">
+      <div class="hero-label">최고 상승 키워드</div>
+      {% if hero_story and hero_story.trend %}
+      <div class="hero-story">
+        <div class="hs-trend status-{{ hero_story.status.color }}">{{ hero_story.trend }}</div>
+        <div class="hs-interp">→ {{ hero_story.interp }}</div>
+        <div class="hs-action">→ {{ hero_story.action }}</div>
+      </div>
+      {% else %}
+      <div class="hero-value"><span class="no-val">데이터 부족</span></div>
+      {% endif %}
+    </div>
+
+    <div class="hero-card c-green">
+      <div class="hero-label">모니터링 경쟁 제품</div>
+      <div class="hero-value">{{ market_summary.competitor_count or 0 }}<span style="font-size:16px;font-weight:400"> 개</span></div>
+      <div class="hero-sub">브랜드 기반 수집</div>
+    </div>
+
+    <div class="hero-card c-insight">
+      <div class="hero-label">이번 주 핵심 인사이트</div>
+      <div class="hero-value">{{ insights.one_line or '분석 결과 준비 중' }}</div>
+      <div class="hero-sub">{{ generated_at }} 자동 생성</div>
+    </div>
+  </div>
+</div>
+
+<!-- [2] 시장 트렌드 -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-dot"></div>
+    <div class="sec-title">시장 트렌드</div>
+    <div class="sec-sub">검색 지수 기준 · 8주 평균 Top 3 강조</div>
+  </div>
+
+  {% if has_trend_data %}
+  <div class="grid2">
+    <div class="card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">키워드 검색 지수 추이
+            {% set raw_chart = chart_data_json|string %}
+            {% if '"has_partial_tail": true' in raw_chart %}
+            <span class="chart-partial-note" title="이번 주는 집계가 완료되면 다음 리포트에 반영됩니다">● 최신 주차 데이터는 집계 완료 후 반영</span>
+            {% endif %}
+          </div>
+          <div class="chart-note">진한 실선 = 최근 평균 Top 3 강조</div>
+        </div>
+        <span class="top3-badge">Top 3 강조</span>
+      </div>
+      {% if chart_overview %}
+      <div class="chart-overview">
+        {% for line in chart_overview %}<div class="co-line">{{ line }}</div>{% endfor %}
+      </div>
+      {% endif %}
+      <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px">
+        키워드별 현황
+        <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:6px">변화율 · 지수(0~100)</span>
+      </div>
+      <div class="kw-list">
+        {% for t in trend_list %}
+        <div class="kw-item kw-item-v2 {% if t.is_top3 %}top3{% endif %}">
+          <div class="kw-line1">
+            <span class="kw-name">{{ t.keyword }}{% if t.partial_flag %}<span class="badge-partial" title="최신 주차는 집계 완료 후 반영되며, 변화율은 직전 완전 주차 기준">집계 중</span>{% endif %}</span>
+            <span class="status-pill status-{{ t.status.color }}">
+              {{ t.status.label }}
+              <span class="status-pct">({% if t.change_pct > 0 %}+{% endif %}{{ t.change_pct }}%)</span>
+            </span>
+          </div>
+          <div class="kw-line2">→ {{ t.status.interp }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        진한 배경 = 8주 평균 Top 3 키워드 / 변화율 = 직전 완전 주차 대비
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="fallback-card">트렌드 데이터를 수집하지 못했습니다.</div>
+  {% endif %}
+</div>
+
+<!-- [3] 자사 제품 -->
+{% if has_own_data %}
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-dot"></div>
+    <div class="sec-title">자사 제품 — {{ brand_name }}</div>
+    <div class="sec-sub">
+      {%- if sku_coverage and sku_coverage.total_defined and sku_coverage.total_defined != sku_coverage.total -%}
+        전체 {{ sku_coverage.total_defined }}개 정의 · active {{ sku_coverage.total }}개
+      {%- else -%}
+        전체 {{ sku_coverage.total if sku_coverage else own_data|length }}개 SKU
+      {%- endif -%}
+      &nbsp;·&nbsp;
+      {%- if sku_coverage and sku_coverage.source == 'config_fallback' -%}
+        <span style="color:var(--muted);font-size:10px">config fallback — data/own_sku_master.json 추가 시 전체 SKU 반영</span>
+      {%- elif sku_coverage -%}
+        <span style="color:var(--green);font-size:10px">{{ sku_coverage.source_label }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {# ── SKU 커버리지 바 ── #}
+  {% if sku_coverage %}
+  <div class="sku-coverage-bar">
+    <span class="sku-stat">
+      {%- if sku_coverage.total_defined and sku_coverage.total_defined != sku_coverage.total -%}
+        마스터 <strong>{{ sku_coverage.total_defined }}</strong>개 정의 · active <strong>{{ sku_coverage.total }}</strong>개
+      {%- else -%}
+        전체 SKU <strong>{{ sku_coverage.total }}</strong>개
+      {%- endif -%}
+    </span>
+    <span style="color:var(--border)">|</span>
+    <span class="sku-stat match">시장 매칭 <strong>{{ sku_coverage.matched }}</strong>개</span>
+    {% if sku_coverage.unmatched > 0 %}
+    <span style="color:var(--border)">|</span>
+    <span class="sku-stat nomatch">시장 미노출 <strong>{{ sku_coverage.unmatched }}</strong>개</span>
+    <span style="color:var(--muted);font-size:11px">→ 일부 SKU 시장 미노출 · 검색 키워드 점검 필요</span>
+    <details class="sku-unmatched">
+      <summary>미노출 SKU 목록 보기 ({{ sku_coverage.unmatched }}개)</summary>
+      <ul>
+      {% for s in sku_coverage.unmatched_skus %}
+        <li>{{ s.name }}<span class="cat-tag">{{ s.category }}</span></li>
+      {% endfor %}
+      </ul>
+    </details>
+    {% else %}
+    <span style="color:var(--green);font-size:11px;font-weight:600">→ {{ sku_coverage.total }}개 중 {{ sku_coverage.matched }}개 매칭 · 시장 노출 정상</span>
+    {% endif %}
+    <span style="color:var(--border)">|</span>
+    <span style="color:var(--muted);font-size:11px">소스: {{ sku_coverage.source_label }}</span>
+  </div>
+  {% if sku_coverage and sku_coverage.series_other_pct is defined and sku_coverage.series_other_pct > 20 %}
+  <div style="margin-top:8px;padding:7px 12px;background:var(--amber-bg);border:1px solid var(--gold-light);border-radius:6px;font-size:11px;color:var(--amber)">
+    ⚠ 라인 미분류 SKU <strong>{{ sku_coverage.series_other_count }}</strong>개 ({{ sku_coverage.series_other_pct }}%) &mdash; "기타" 비중 과다 &middot; config의 <code>own_series_map</code>에 신규 라인 키워드 추가 권장
+  </div>
+  {% endif %}
+  {% endif %}
+
+  <div class="view-mode-bar">
+    <button class="view-mode-btn active" data-mode="series">라인별 보기</button>
+    <button class="view-mode-btn" data-mode="all">전체 SKU 보기</button>
+  </div>
+
+  <div class="cat-tabs" id="catTabs">
+    <button class="cat-tab active" data-cat="all">전체</button>
+    {% for c in categories %}<button class="cat-tab" data-cat="{{ c }}">{{ c }}</button>{% endfor %}
+  </div>
+
+  <div class="ctrl-bar">
+    <div class="sort-bar">
+      <span class="sort-state-label" id="sortStateLabel">정렬: 기본순</span>
+      <button class="sort-btn active" data-sort="default">기본순</button>
+      <button class="sort-btn" data-sort="price">기준가</button>
+      <button class="sort-btn" data-sort="gap">시장 괴리</button>
+      <button class="sort-btn" data-sort="comp-gap">경쟁사 대비</button>
+    </div>
+    <div class="expand-ctrl" id="expandCtrl">
+      <button class="expand-btn" onclick="expandAll()">전체 펼치기</button>
+      <button class="expand-btn" onclick="collapseAll()">전체 접기</button>
+    </div>
+  </div>
+
+  {# ---- macro: SKU row ---- #}
+  {% macro sku_row(p, idx, show_series=False) -%}
+    {% set our = (p.display_price or p.our_price) or 0 %}
+    {% set mmin = p.min_price or 0 %}
+    {% set cmin = p.cat_avg_ref_price or 0 %}
+    {% set gap = (our - mmin) if (our and mmin) else 0 %}
+    {% set cgap = (our - cmin) if (our and cmin) else 0 %}
+    {% set lvl = '' %}{% set lvl_lbl = '' %}
+    {% if our and cmin %}
+      {% set ratio = (our - cmin) / cmin %}
+      {% if ratio <= -0.05 %}{% set lvl='ok' %}{% set lvl_lbl='경쟁우위' %}
+      {% elif ratio <= 0.10 %}{% set lvl='mid' %}{% set lvl_lbl='적정' %}
+      {% else %}{% set lvl='high' %}{% set lvl_lbl='고가' %}{% endif %}
+    {% endif %}
+    <tr data-original="{{ idx }}" data-cat="{{ p.category }}" data-series="{{ p.series }}"
+        data-price="{{ our }}" data-gap="{{ gap }}" data-comp-gap="{{ cgap }}">
+      <td>
+        {% if p.status_info %}
+          <span class="sku-status-icon" title="{{ p.status_info.reason }}">{{ p.status_info.icon }}</span>
+        {% endif %}
+        <span class="sku-name">{{ p.name }}</span>{% if p.volume %}<span class="sku-vol">{{ p.volume }}</span>{% endif %}
+        {%- if p.source_count and p.source_count > 1 -%}
+          <span class="sku-src-count" title="제목 변형 {{ p.source_count }}개 병합됨">×{{ p.source_count }}</span>
+        {%- endif -%}
+        {% if p.status_info and p.status_info.action %}
+          <span class="sku-status-action" data-tip="{{ p.status_info.action }}">?</span>
+        {% endif %}
+      </td>
+      {% if show_series %}
+        <td>
+          <span class="sku-series">{{ p.series }}</span>
+          {%- if p.series_confidence == 'medium' -%}
+            <span class="conf-badge medium" title="제목에서 추론된 라인명">추론</span>
+          {%- elif p.series_confidence == 'low' -%}
+            <span class="conf-badge low" title="own_series_map 미등록">미분류</span>
+          {%- endif -%}
+        </td>
+        <td><span class="sku-cat">{{ p.category }}</span></td>
+      {% endif %}
+      <td class="price-val">
+        {%- if our -%}
+          {{ '{:,}'.format(our) }}원
+          {%- if p.price_source == 'observed' -%}
+            <span class="price-badge observed" title="네이버 쇼핑 발견가 (관찰 최저가)">발견가</span>
+          {%- endif -%}
+        {%- else -%}<span class="no-val">—</span>{%- endif -%}
+      </td>
+      <td class="price-val" style="color:var(--muted)">{% if mmin %}{{ '{:,}'.format(mmin) }}원{% else %}<span class="no-val">—</span>{% endif %}</td>
+      <td class="price-val" style="color:var(--muted)">{% if cmin %}{{ '{:,}'.format(cmin) }}원{% else %}<span class="no-val">—</span>{% endif %}</td>
+      <td class="price-val">{% if gap %}{% if gap > 0 %}+{% endif %}{{ '{:,}'.format(gap) }}원{% else %}0원{% endif %}</td>
+      <td>{% if lvl %}<span class="lvl-badge lvl-{{ lvl }}">{{ lvl_lbl }}</span>{% else %}<span class="no-val">—</span>{% endif %}</td>
+      <td>{% if p.comp_status %}<span class="badge-comp {{ p.comp_status.code }}" data-desc="{{ p.comp_status.desc }}">{{ p.comp_status.label }}</span>{% endif %}</td>
+    </tr>
+  {%- endmacro %}
+
+  <!-- ① 라인별 보기 -->
+  <div id="seriesView">
+    {% for series, items in series_map.items() %}
+    <div class="series-block" data-series="{{ series }}">
+      <div class="series-hdr" onclick="toggleSeries(this)">
+        <span class="series-name">{{ series }}</span>
+        {%- set s_conf = items[0].series_confidence if items else '' -%}
+        {%- if s_conf == 'medium' -%}
+          <span class="conf-badge medium" title="제목에서 추론된 라인명 — own_series_map에 추가하면 high로 승격됩니다" style="font-size:10px;padding:2px 7px">추론된 라인</span>
+        {%- elif s_conf == 'low' or series == '기타' -%}
+          <span class="conf-badge low" title="own_series_map 미등록 — 신규 라인 키워드 추가 필요" style="font-size:10px;padding:2px 7px">미분류</span>
+        {%- endif -%}
+        <span class="series-count">{{ items|length }}개 SKU</span>
+        <span class="series-toggle">▼</span>
+      </div>
+      <div class="series-body">
+        <table class="sku-table">
+          <thead><tr>
+            <th>제품명</th>
+            <th class="r">기준가<br><span style="font-weight:400;color:var(--muted);font-size:9px">공식가 우선·발견가 폴백</span></th>
+            <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+            <th class="r">카테고리 평균 참조가<br><span style="font-weight:400;color:var(--muted);font-size:9px">경쟁사 단품 평균</span></th>
+            <th class="r">시장 괴리</th>
+            <th>경쟁사 대비</th>
+            <th>출처 상태</th>
+          </tr></thead>
+          <tbody>
+            {% for p in items %}{{ sku_row(p, loop.index0) }}{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="price-legend">카테고리 평균 참조가 = 경쟁사 단품 평균 ml가 × 자사 SKU 용량 &nbsp;·&nbsp; 경쟁우위 (-5% 이하) · 적정 (±10%) · 고가 (+10% 초과)</div>
+  </div>
+
+  <!-- ② 전체 SKU 보기 -->
+  <div id="allSkuView" style="display:none">
+    <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+    <table class="sku-table">
+      <thead><tr>
+        <th class="sortable" data-col="name">제품명</th>
+        <th class="sortable" data-col="series">라인</th>
+        <th class="sortable" data-col="cat">카테고리</th>
+        <th class="r sortable" data-col="price">기준가</th>
+        <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+        <th class="r">카테고리 평균 참조가<br><span style="font-weight:400;color:var(--muted);font-size:9px">경쟁사 단품 평균</span></th>
+        <th class="r sortable" data-col="gap">시장 괴리</th>
+        <th class="sortable" data-col="comp-gap">경쟁사 대비</th>
+        <th>출처 상태</th>
+      </tr></thead>
+      <tbody>
+        {% for p in own_data %}{{ sku_row(p, loop.index0, show_series=True) }}{% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <div class="price-legend">카테고리 평균 참조가 = 경쟁사 단품 평균 ml가 × 자사 SKU 용량 &nbsp;·&nbsp; 경쟁우위 (-5% 이하) · 적정 (±10%) · 고가 (+10% 초과)</div>
+  </div>
+</div>
+{% endif %}
+
+<!-- [4] 경쟁 제품 분석 — 브랜드 기반 시장 구조 -->
+{% if has_competitor_data %}
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-dot"></div>
+    <div class="sec-title">경쟁사 가격 포지셔닝</div>
+    <div class="sec-sub">단품 ml당 가격 기준 · 브랜드별 비교</div>
+  </div>
+
+  {# ── 경쟁사 브랜드 기준 메타 (canonical만 표시) ── #}
+  {% set display_brands = canonical_brands if canonical_brands else competitor_brands %}
+  {% if display_brands %}
+  <div class="comp-section-meta">
+    <div class="comp-meta-item"><strong>경쟁사</strong> {{ display_brands|length }}개 브랜드 · 브랜드×카테고리 수집</div>
+    <span class="ib-sep">|</span>
+    <div class="comp-meta-item">단품 · 행사·묶음 · 비정상 3구간 · ml당 가격 환산</div>
+  </div>
+  <div class="brand-tags" style="margin-bottom:16px">
+    {% for b in display_brands %}<span class="brand-tag">{{ b }}</span>{% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── macro: sub-market ── #}
+  {% macro sub_block(bucket, label, css_class, is_risk=False) -%}
+    {% set s = bucket.summary or {} %}
+    {% set items = bucket['items'] or [] %}
+    {% set n = s.sample_count or 0 %}
+    {% set rel = s.reliability or {} %}
+    <div class="sub-market {{ css_class }}">
+      <div class="sm-hdr">
+        <span class="sm-label">{{ label }}</span>
+        <span class="sm-count">{{ n }}개 · {{ s.brand_count or 0 }} 브랜드</span>
+        {% if n > 0 %}
+          {% set rtier = rel.tier or 'low' %}
+          <span class="reliability-badge rb-{{ rtier }}">
+            <span class="rb-dot"></span>{{ rel.label or rtier }}
+          </span>
+        {% endif %}
+      </div>
+      {% if n > 0 %}
+        {% if is_risk %}<div class="comp-risk-warn">⚠ 공식가 -60% 이하 · 병행/비정품 의심 구간</div>{% endif %}
+        {% if not s.enough_data %}
+        <div class="data-warn">⚠ 데이터 부족 ({{ n }}개) — 평균 계산 신뢰도 낮음 · 결과 미표시</div>
+        {% else %}
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">{{ s.avg_ml_price or 0 }}<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">{{ s.median_ml_price or 0 }}<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">{{ '{:,}'.format(s.avg_price or 0) }}<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">표본</div>
+            <div class="sm-cell-value">{{ n }}<span class="sm-cell-unit">개</span></div></div>
+        </div>
+        {% endif %}
+        <div class="comp-rows">
+          {% for it in items %}
+          <div class="comp-row">
+            <span class="comp-rank">{{ loop.index }}</span>
+            <span class="comp-title" title="{{ it.title }}">{{ it.title }}</span>
+            <span class="comp-mall">{{ it.mall }}</span>
+            <span class="comp-mlprice">{% if it.ml_price %}{{ it.ml_price }}/ml{% else %}—{% endif %}</span>
+            <span class="comp-price">{{ '{:,}'.format(it.price) }}원</span>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="comp-empty">해당 구간 상품 없음</div>
+      {% endif %}
+    </div>
+  {%- endmacro %}
+
+  <div class="comp-grid">
+  {% for comp in competitor_data %}
+    {% set sn  = comp.single.summary.sample_count   or 0 %}
+    {% set pr  = comp.promo.summary.sample_count     or 0 %}
+    {% set ab  = comp.abnormal.summary.sample_count  or 0 %}
+    {% if (sn + pr + ab) > 0 %}
+    {# comp_insights_map: category → insight dict #}
+    {% set ins = comp_insights_map[comp.category] if comp_insights_map and comp.category in comp_insights_map else {} %}
+    <div class="card comp-block">
+
+      {# ── [요약 영역 — 항상 보임] ── #}
+      {% set ss = comp.single.summary or {} %}
+      {% set rel = ss.reliability or {} %}
+      {% set rtier = rel.tier or 'low' %}
+
+      {# 헤더 행 #}
+      <div class="comp-cat-hdr">
+        <span class="comp-cat-name">{{ comp.category }}</span>
+        {% if comp.vol_range %}
+          <span class="comp-criteria">{{ comp.vol_range.min|int }}~{{ comp.vol_range.max|int }}ml 단품</span>
+        {% endif %}
+        {# 신뢰도 배지 + 근거 #}
+        {% if sn > 0 %}
+          <span class="reliability-badge rb-{{ rtier }}">
+            <span class="rb-dot"></span>{{ rel.label or rtier }} (단품 {{ sn }}개 기준)
+          </span>
+        {% endif %}
+      </div>
+
+      {# 핵심 지표 한 줄 요약 #}
+      <div class="comp-summary-row">
+        <div class="csr-item">
+          <span class="csr-label">단품</span>
+          <span class="csr-val">{{ sn }}개</span>
+        </div>
+        <div class="csr-item">
+          <span class="csr-label">행사·묶음</span>
+          <span class="csr-val">{{ pr }}개</span>
+        </div>
+        {% if ab > 0 %}
+        <div class="csr-item warn">
+          <span class="csr-label">비정상</span>
+          <span class="csr-val">{{ ab }}개</span>
+        </div>
+        {% endif %}
+        {% if comp.our_ml_price and comp.our_ml_price > 0 %}
+        <div class="csr-item">
+          <span class="csr-label">자사</span>
+          <span class="csr-val">{{ comp.our_ml_price }}원/ml</span>
+        </div>
+        {% endif %}
+        {% if ss.avg_ml_price and ss.avg_ml_price > 0 and ss.enough_data %}
+        <div class="csr-item">
+          <span class="csr-label">시장 평균</span>
+          <span class="csr-val">{{ ss.avg_ml_price }}원/ml</span>
+        </div>
+        {% endif %}
+        {# 포지션 레이블 #}
+        {% if ins and ins.position_label %}
+          {% set pl = ins.position_label %}
+          {% if pl == '프리미엄 포지션' %}<span class="pos-label premium" style="align-self:center">{{ pl }}</span>
+          {% elif pl == '고가 포지션' %}<span class="pos-label high-price" style="align-self:center">{{ pl }}</span>
+          {% elif pl == '시장 평균' %}<span class="pos-label avg" style="align-self:center">{{ pl }}</span>
+          {% elif pl == '저가 포지션' %}<span class="pos-label low-price" style="align-self:center">{{ pl }}</span>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      {# 시장 구조 바 #}
+      {% set tot = (sn + pr + ab) or 1 %}
+      <div class="struct-bar" style="margin-top:8px">
+        <div class="sb-single"   style="flex:{{ sn }};min-width:{{ '2px' if sn else '0' }}" title="단품 {{ sn }}개"></div>
+        <div class="sb-promo"    style="flex:{{ pr }};min-width:{{ '2px' if pr else '0' }}" title="행사 {{ pr }}개"></div>
+        <div class="sb-abnormal" style="flex:{{ ab }};min-width:{{ '2px' if ab else '0' }}" title="비정상 {{ ab }}개"></div>
+      </div>
+      <div class="struct-legend">
+        <span><span class="sl-dot" style="background:var(--navy)"></span>단품 {{ sn }}</span>
+        <span><span class="sl-dot" style="background:#a855f7"></span>행사·묶음 {{ pr }}</span>
+        {% if ab %}<span><span class="sl-dot" style="background:var(--red)"></span>비정상 {{ ab }}</span>{% endif %}
+        {% if comp.single_out_cnt and comp.single_out_cnt > 0 %}
+          <span style="color:var(--muted)"><span class="sl-dot" style="background:var(--border)"></span>용량 제외 {{ comp.single_out_cnt }}</span>
+        {% endif %}
+      </div>
+
+      {# ── 인사이트 카드 (2×2, 항상 보임) ── #}
+      {% if ins %}
+      <div class="insight-card" style="margin-top:10px">
+        <div class="insight-col">
+          <div class="insight-col-label">시장 구조</div>
+          <div class="insight-col-text">{{ ins.market_structure or '—' }}</div>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-label">자사 포지션</div>
+          <div class="insight-col-text">{{ ins.position_sentence or '데이터 부족' }}</div>
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-label">문제</div>
+          {% if ins.problems %}
+          <div class="ci-problems">
+            {% for p in ins.problems %}<div class="ci-problem">{{ p }}</div>{% endfor %}
+          </div>
+          {% else %}
+          <div class="ci-no-problem">✓ 특이사항 없음</div>
+          {% endif %}
+        </div>
+        <div class="insight-col">
+          <div class="insight-col-label">액션</div>
+          {% if ins.high_priority_actions %}
+          {% for hp in ins.high_priority_actions %}
+          <div class="hp-action">
+            <span class="hp-badge">HIGH</span>
+            <span class="insight-col-text">{{ hp.action }}
+              <small class="hp-problem">← {{ hp.problem }}</small>
+            </span>
+          </div>
+          {% endfor %}
+          {% elif ins.actions %}
+          <div class="ci-actions">
+            {% for a in ins.actions %}<div class="ci-action">{{ a }}</div>{% endfor %}
+          </div>
+          {% else %}
+          <div class="ci-no-problem">✓ 추가 액션 불필요</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# ── [상세 영역 — 기본 숨김, 토글] ── #}
+      <button class="comp-toggle-btn" onclick="toggleCompDetail(this)">
+        <span class="comp-toggle-icon">▼</span> 상세 보기
+      </button>
+      <div class="comp-detail">
+        {# 포지셔닝 차트 #}
+        {% if comp.brand_data and comp.brand_data|length > 0 %}
+          <div class="pos-chart-wrap" style="margin-top:12px">
+            <canvas id="posChart_{{ comp.category }}" style="max-height:170px"></canvas>
+          </div>
+          <div class="pos-chart-note">단품 ml당 평균 (원/ml) · 금색 = 자사</div>
+        {% endif %}
+
+        {# 서브 마켓 리스트 #}
+        {{ sub_block(comp.single,   '단품 시장',       'single') }}
+        {{ sub_block(comp.promo,    '행사·묶음 시장',  'promo') }}
+        {{ sub_block(comp.abnormal, '비정상 가격 구간','risk', is_risk=True) }}
+      </div>
+
+    </div>
+    {% endif %}
+  {% endfor %}
+  </div>
+
+  <div class="comp-source-note">
+    {% set display_brands = canonical_brands if canonical_brands else competitor_brands %}
+    ※ 경쟁사 기준: {{ display_brands|join(', ') if display_brands else '네이버 쇼핑 검색 기반' }} &nbsp;·&nbsp;
+    <strong>단품</strong>: 기본 SKU 1개 &nbsp;·&nbsp;
+    <strong>행사·묶음</strong>: 1+1/증정/N개/세트 등 총 용량 환산 &nbsp;·&nbsp;
+    <strong>비정상</strong>: 공식가 대비 -60% 이하 (가격 비교 제외 · 리스크 표시)
+  </div>
+</div>
+
+{# ── 포지셔닝 차트 JS ── #}
+<script>
+(function(){
+  const vizData = {{ comp_viz_json|safe }};
+  const goldColor  = '#c09a5a';
+  const navyColor  = 'rgba(27,44,79,0.72)';
+  const redColor   = 'rgba(185,28,28,0.65)';
+
+  vizData.forEach(cat => {
+    const canvas = document.getElementById('posChart_' + cat.category);
+    if (!canvas || !cat.brand_data || cat.brand_data.length === 0) return;
+
+    const sorted = [...cat.brand_data].sort((a,b) => a.avg_ml_price - b.avg_ml_price);
+    const labels = sorted.map(d => d.brand);
+    const values = sorted.map(d => d.avg_ml_price);
+    const colors = sorted.map(d => d.is_ours ? goldColor : navyColor);
+    const borders = sorted.map(d => d.is_ours ? '#a07840' : 'transparent');
+
+    const maxV = Math.max(...values) * 1.18;
+
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderColor: borders,
+          borderWidth: 2,
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: c => ` ${c.parsed.x} 원/ml`,
+              title: c => c[0].label,
+            }
+          },
+          annotation: cat.our_ml > 0 ? {
+            annotations: {
+              ourLine: {
+                type: 'line', xMin: cat.our_ml, xMax: cat.our_ml,
+                borderColor: goldColor, borderWidth: 2,
+                borderDash: [4,3],
+                label: { display: false }
+              }
+            }
+          } : {}
+        },
+        scales: {
+          x: {
+            min: 0, max: maxV,
+            grid: { color: '#f0ede8' },
+            ticks: { font:{size:9}, color:'#7a8499',
+              callback: v => v + '원' }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font:{size:10}, color:'#1b2c4f' }
+          }
+        }
+      }
+    });
+  });
+})();
+</script>
+{% endif %}
+
+<!-- [5] 우선 확인 필요 -->
+{% if insights.priority_checks %}
+<div class="section">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">우선 확인 필요</div></div>
+  <div class="priority-grid">
+    {% for pc in insights.priority_checks %}
+    <div class="priority-card {% if pc.count and pc.count > 0 %}warn{% else %}ok{% endif %}">
+      <div class="priority-count">{{ pc.count if pc.count is not none else '-' }}</div>
+      <div class="priority-body">
+        <div class="priority-label">{{ pc.label }}</div>
+        <div class="priority-detail">{{ pc.detail }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- [6] 핵심 인사이트 Top 3 -->
+{% if has_insights and insights.insights %}
+<div class="section">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">핵심 인사이트 Top 3</div></div>
+  <div class="insight-grid">
+    {% for it in insights.insights[:3] %}
+    <div class="insight-card">
+      <div class="insight-col"><div class="insight-col-label">데이터 변화</div><div class="insight-col-text">{{ it.data_change }}</div></div>
+      <div class="insight-col"><div class="insight-col-label">해석 (가능성)</div><div class="insight-col-text">{{ it.interpretation }}</div></div>
+      <div class="insight-col"><div class="insight-col-label">추가 확인 필요</div><div class="insight-col-text">{{ it.confirm_needed }}</div></div>
+      <div class="insight-col"><div class="insight-col-label">액션</div><div class="insight-col-text">{{ it.action }}</div></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- [7] 즉시 액션 + 리스크 -->
+{% if has_insights and (insights.action_items or insights.risks) %}
+<div class="section">
+  <div class="grid2">
+    {% if insights.action_items %}
+    <div>
+      <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">즉시 액션</div></div>
+      <div class="action-list">
+        {% for a in insights.action_items[:3] %}
+          {% set pr = a.priority or '' %}
+          {% set cls = 'l' %}
+          {% if '높' in pr %}{% set cls = 'h' %}{% elif '중' in pr %}{% set cls = 'm' %}{% endif %}
+        <div class="action-item {{ cls }}">
+          <span class="action-badge">{{ pr or '-' }}</span>
+          <div class="action-body">
+            <div class="action-text">{{ a.action }}</div>
+            <div class="action-deadline">{{ a.deadline }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if insights.risks %}
+    <div>
+      <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">리스크</div></div>
+      <div class="risk-list">
+        {% for r in insights.risks[:2] %}
+        <div class="risk-item"><span class="risk-icon">⚠</span><span>{{ r }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- [8] 시장 전망 -->
+{% if has_insights and insights.market_outlook %}
+<div class="section">
+  <div class="outlook-box">
+    <div class="outlook-label">시장 전망</div>
+    <div class="outlook-text">{{ insights.market_outlook }}</div>
+  </div>
+</div>
+{% endif %}
+
+</div><!-- /wrap -->
+
+<div class="footer">
+  <strong>{{ company_name }} · {{ brand_name }}</strong> &nbsp;|&nbsp;
+  선케어 AI 마켓 인텔리전스 &nbsp;|&nbsp;
+  Powered by Claude AI &amp; 네이버 데이터랩/쇼핑 &nbsp;|&nbsp;
+  {{ generated_at }} 자동 생성
+</div>
+
+{% if has_trend_data %}
+<script>
+(function(){
+  const raw = {{ chart_data_json|safe }};
+  const top3 = {{ top3_json|safe }};
+
+  raw.datasets.forEach(ds => { ds.borderOpacity = top3.includes(ds.label) ? 1 : 0.18; });
+
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: raw,
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font:{size:11}, padding:12, usePointStyle:true, pointStyleWidth:8,
+            generateLabels(chart) {
+              return Chart.defaults.plugins.legend.labels.generateLabels(chart).map(item => {
+                item.fontColor = top3.includes(item.text) ? '#1b2c4f' : '#a0aab4';
+                return item;
+              });
+            }
+          },
+          onClick(e, item, legend) {
+            const ci = legend.chart;
+            const meta = ci.getDatasetMeta(item.datasetIndex);
+            meta.hidden = !meta.hidden;
+            ci.update();
+          }
+        },
+        tooltip: { mode:'index', intersect:false, callbacks:{ label: c => ` ${c.dataset.label}: ${c.parsed.y}` } }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:10},color:'#7a8499',maxTicksLimit:6} },
+        y: { grid:{color:'#f0ede8'}, ticks:{font:{size:10},color:'#7a8499'},
+             title:{display:true,text:'검색 지수 (0~100)',font:{size:10},color:'#7a8499'} }
+      },
+      interaction: { mode:'nearest', axis:'x', intersect:false }
+    },
+    plugins: [{
+      id:'dimmer',
+      beforeDatasetDraw(chart, args) {
+        const label = chart.data.datasets[args.index].label;
+        const alpha = top3.includes(label) ? 1 : 0.18;
+        const meta = chart.getDatasetMeta(args.index);
+        if (!meta.hidden) {
+          args.meta.dataset.options.borderColor = hexAlpha(chart.data.datasets[args.index].borderColor, alpha);
+        }
+      }
+    }]
+  });
+
+  function hexAlpha(hex, alpha) {
+    if (hex.startsWith('#')) {
+      const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    return hex;
+  }
+})();
+</script>
+{% endif %}
+
+<script>
+const ownState = { view: 'series', cat: 'all', sort: 'default', dir: 'asc' };
+
+function toggleCompDetail(btn) {
+  const detail = btn.nextElementSibling;
+  const isOpen = detail.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.querySelector('.comp-toggle-icon').textContent = isOpen ? '▲' : '▼';
+  btn.innerHTML = btn.innerHTML.replace(
+    isOpen ? '상세 보기' : '접기', isOpen ? '접기' : '상세 보기'
+  );
+}
+
+function toggleSeries(hdr) {
+  const body = hdr.nextElementSibling;
+  const icon = hdr.querySelector('.series-toggle');
+  const isOpen = body.classList.toggle('open');
+  icon.classList.toggle('open', isOpen);
+}
+function expandAll() {
+  document.querySelectorAll('#seriesView .series-body').forEach(b => b.classList.add('open'));
+  document.querySelectorAll('#seriesView .series-toggle').forEach(i => i.classList.add('open'));
+}
+function collapseAll() {
+  document.querySelectorAll('#seriesView .series-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('#seriesView .series-toggle').forEach(i => i.classList.remove('open'));
+}
+
+document.querySelectorAll('.view-mode-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    ownState.view = this.dataset.mode;
+    document.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const sv = document.getElementById('seriesView');
+    const av = document.getElementById('allSkuView');
+    const ec = document.getElementById('expandCtrl');
+    if (sv) sv.style.display = ownState.view === 'series' ? '' : 'none';
+    if (av) av.style.display = ownState.view === 'all'    ? '' : 'none';
+    if (ec) ec.style.display = ownState.view === 'series' ? '' : 'none';
+    applyFilter();
+  });
+});
+
+document.querySelectorAll('#catTabs .cat-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#catTabs .cat-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    ownState.cat = this.dataset.cat;
+    applyFilter();
+  });
+});
+
+function applyFilter() {
+  const cat = ownState.cat;
+  document.querySelectorAll('#seriesView .sku-table tbody tr, #allSkuView .sku-table tbody tr').forEach(row => {
+    row.style.display = (cat === 'all' || row.dataset.cat === cat) ? '' : 'none';
+  });
+  document.querySelectorAll('#seriesView .series-block').forEach(block => {
+    const hasVisible = [...block.querySelectorAll('tbody tr')].some(r => r.style.display !== 'none');
+    block.style.display = hasVisible ? '' : 'none';
+  });
+  ['seriesView','allSkuView'].forEach(id => {
+    const container = document.getElementById(id);
+    if (!container || container.style.display === 'none') return;
+    const hasVisible = [...container.querySelectorAll('tbody tr')].some(r => r.style.display !== 'none');
+    let ph = container.querySelector('.empty-cat-ph');
+    if (!hasVisible && cat !== 'all') {
+      if (!ph) {
+        ph = document.createElement('div');
+        ph.className = 'empty-cat-ph';
+        ph.style.cssText = 'padding:24px;text-align:center;color:var(--muted);background:var(--cream);border:1px dashed var(--border);border-radius:10px;margin-top:12px;font-size:13px';
+        ph.textContent = '해당 카테고리 SKU 없음';
+        container.appendChild(ph);
+      }
+      ph.style.display = '';
+    } else if (ph) {
+      ph.style.display = 'none';
+    }
+  });
+  applySort();
+}
+
+function rowVal(row, col) {
+  if (col === 'default') return parseInt(row.dataset.original) || 0;
+  if (col === 'price')   return parseFloat(row.dataset.price)   || 0;
+  if (col === 'gap')     return parseFloat(row.dataset.gap)     || 0;
+  if (col === 'comp-gap') return parseFloat(row.dataset.compGap) || 0;
+  return 0;
+}
+
+function sortTbody(tbody) {
+  const { sort, dir } = ownState;
+  const rows = [...tbody.querySelectorAll('tr')];
+  rows.sort((a, b) => {
+    const va = rowVal(a, sort), vb = rowVal(b, sort);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+function applySort() {
+  if (ownState.view === 'series') {
+    document.querySelectorAll('#seriesView .sku-table tbody').forEach(sortTbody);
+  } else {
+    const tbody = document.querySelector('#allSkuView .sku-table tbody');
+    if (tbody) sortTbody(tbody);
+  }
+}
+
+function updateSortUI() {
+  const names = { default: '기본순', price: '기준가', gap: '시장 괴리', 'comp-gap': '경쟁사 대비' };
+  const arrow = ownState.dir === 'asc' ? ' ↑' : ' ↓';
+  document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
+    const col = btn.dataset.sort;
+    btn.classList.toggle('active', col === ownState.sort);
+    btn.textContent = names[col] + (col === ownState.sort && col !== 'default' ? arrow : '');
+  });
+  const label = ownState.sort === 'default' ? '기본순' : names[ownState.sort] + arrow;
+  const el = document.getElementById('sortStateLabel');
+  if (el) el.textContent = '정렬: ' + label;
+}
+
+document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const col = this.dataset.sort;
+    if (col === 'default') { ownState.sort = 'default'; ownState.dir = 'asc'; }
+    else if (ownState.sort === col) { ownState.dir = ownState.dir === 'asc' ? 'desc' : 'asc'; }
+    else { ownState.sort = col; ownState.dir = 'asc'; }
+    updateSortUI();
+    applySort();
+  });
+});
+
+document.querySelectorAll('#allSkuView .sku-table th.sortable').forEach(th => {
+  th.addEventListener('click', function() {
+    const col = this.dataset.col;
+    const colMap = { price: 'price', gap: 'gap', 'comp-gap': 'comp-gap', name: 'default', series: 'default', cat: 'default' };
+    const mapped = colMap[col] || 'default';
+    if (ownState.sort === mapped && mapped !== 'default') {
+      ownState.dir = ownState.dir === 'asc' ? 'desc' : 'asc';
+    } else { ownState.sort = mapped; ownState.dir = 'asc'; }
+    document.querySelectorAll('#allSkuView .sku-table th').forEach(h => h.classList.remove('sort-asc','sort-desc'));
+    if (mapped !== 'default') this.classList.add(ownState.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+    updateSortUI();
+    applySort();
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>선케어 마켓 모니터링</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #0f766e;
+      --danger: #b91c1c;
+      --ok: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .title { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+    .meta { color: var(--muted); font-size: 14px; margin: 4px 0; }
+    .sec-title { font-size: 20px; font-weight: 800; margin: 0 0 8px; }
+    .sec-sub { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+    @media (max-width: 700px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfdff;
+    }
+    .kpi .k { font-size: 11px; color: var(--muted); }
+    .kpi .v { font-size: 18px; font-weight: 800; margin-top: 2px; }
+    .v.high { color: var(--danger); }
+    .v.ok { color: var(--ok); }
+
+    .list { border-top: 1px solid var(--line); margin-top: 10px; }
+    .row {
+      display: grid;
+      grid-template-columns: 28px 1fr 120px 110px;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+      align-items: center;
+      font-size: 14px;
+    }
+    .rank { color: var(--muted); font-weight: 700; text-align: center; }
+    .mall { color: var(--muted); font-size: 12px; text-align: right; }
+    .price { font-weight: 700; text-align: right; }
+    .source-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+    .table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .table th, .table td { border-bottom: 1px solid var(--line); padding: 8px; text-align: left; }
+    .table th { font-size: 12px; color: var(--muted); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 class="title">선케어 마켓 모니터링</h1>
+      <div class="meta">씨엠에스랩 · 셀퓨전씨</div>
+      <div class="meta">생성 시각: 2026-04-21 17:16</div>
+      <div class="meta">출처: 네이버 데이터랩 + 네이버 쇼핑</div>
+      <div class="meta">경쟁사 기준: 네이버 쇼핑 검색 결과 기반(연관도순 미사용, 노이즈/이상치 필터 적용)</div>
+      <div class="meta">네이버 쇼핑 검색 결과 기반 · 연관도순이 아닌 필터링 데이터</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">경쟁 제품 분석</div>
+      <div class="sec-sub">리스트보다 시장 요약을 먼저 보여줍니다.</div>
+
+      
+      <div class="meta">경쟁사 데이터가 없습니다. config.json의 competitor_searches를 확인하세요.</div>
+      
+    </div>
+
+    <div class="card">
+      <div class="sec-title">자사 제품 요약</div>
+      
+      <table class="table">
+        <thead>
+          <tr>
+            <th>제품</th><th>카테고리</th><th>공식가</th><th>경쟁사 최저</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>레이저 UV 썬스크린 50ml</td>
+            <td>선크림</td>
+            <td>43,000원</td>
+            <td>-</td>
+            <td>경쟁사 매칭 실패</td>
+          </tr>
+          
+          <tr>
+            <td>레이저 UV 포어 썬 세럼 40ml</td>
+            <td>선세럼</td>
+            <td>17,800원</td>
+            <td>-</td>
+            <td>경쟁사 매칭 실패</td>
+          </tr>
+          
+          <tr>
+            <td>아쿠아티카 쿨링 썬스크린 50ml</td>
+            <td>선크림</td>
+            <td>42,000원</td>
+            <td>-</td>
+            <td>경쟁사 매칭 실패</td>
+          </tr>
+          
+          <tr>
+            <td>아쿠아티카 썬 스프레이 100ml</td>
+            <td>선스프레이</td>
+            <td>25,000원</td>
+            <td>-</td>
+            <td>경쟁사 매칭 실패</td>
+          </tr>
+          
+          <tr>
+            <td>잡티 토닝 썬스크린 50ml</td>
+            <td>선크림</td>
+            <td>43,500원</td>
+            <td>-</td>
+            <td>경쟁사 매칭 실패</td>
+          </tr>
+          
+          <tr>
+            <td>더마 릴리프 썬스크린 50ml</td>
+            <td>선크림</td>
+            <td>35,000원</td>
+            <td>-</td>
+            <td>경쟁사 매칭 실패</td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </div>
+  </div>
+</body>
+</html>

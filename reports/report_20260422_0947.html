@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>선케어 마켓 모니터링 — 2026-04-22</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1b2c4f; --navy2:#243460; --navy-light:#e8ecf4;
+  --gold:#c09a5a; --gold-light:#e8d5aa; --gold-bg:#fdf8f0;
+  --cream:#f8f6f2; --white:#fff;
+  --text:#1b2c4f; --muted:#6b7685; --border:#e4e0d8;
+  --green:#15803d; --green-bg:#dcfce7;
+  --red:#b91c1c;   --red-bg:#fee2e2;
+  --amber:#92400e; --amber-bg:#fef9c3;
+  --blue-bg:#eef1f8; --blue-border:#c5cfe8;
+  --shadow:0 2px 16px rgba(27,44,79,.07);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+     background:var(--cream);color:var(--text);font-size:14px;line-height:1.65}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);display:flex;align-items:stretch;padding:0 40px}
+.hdr-brand{padding:24px 28px 24px 0;border-right:1px solid rgba(255,255,255,.1);margin-right:28px;flex-shrink:0}
+.hdr-co{font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:3px}
+.hdr-brand-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em}
+.hdr-center{flex:1;display:flex;align-items:center}
+.hdr-title{font-size:15px;font-weight:600;color:rgba(255,255,255,.7)}
+.hdr-right{display:flex;align-items:center;padding:24px 0}
+.hdr-date .dl{font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:2px}
+.hdr-date .dv{font-size:13px;font-weight:600;color:var(--gold-light)}
+.gold-bar{height:3px;background:linear-gradient(90deg,var(--navy2),var(--gold),var(--gold-light),var(--gold),var(--navy2))}
+
+/* ── STICKY INFO BANNER ── */
+.info-banner{position:sticky;top:0;z-index:100;background:rgba(27,44,79,.97);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,.08);padding:8px 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ib-item{font-size:11px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:5px}
+.ib-item strong{color:var(--gold-light);font-weight:600}
+.ib-sep{color:rgba(255,255,255,.2);font-size:10px}
+.tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+.tooltip-icon{width:14px;height:14px;background:rgba(255,255,255,.2);border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff;cursor:help;flex-shrink:0}
+.tooltip-box{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#fff;color:var(--text);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;font-size:12px;line-height:1.6;width:240px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200}
+.tooltip-wrap:hover .tooltip-box{display:block}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 60px}
+.section{margin-bottom:32px}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.sec-title{font-size:15px;font-weight:700;color:var(--navy)}
+.sec-sub{font-size:11px;color:var(--muted);margin-left:auto}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:20px 24px;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* ── HERO ── */
+.hero{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:16px;margin-bottom:20px}
+.hero-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);
+  padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.hero-card.c-blue::before{background:var(--navy)}
+.hero-card.c-gold::before{background:var(--gold)}
+.hero-card.c-green::before{background:var(--green)}
+.hero-card.c-insight{background:var(--navy);border-color:transparent}
+.hero-label{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.hero-card.c-insight .hero-label{color:var(--gold)}
+.hero-value{font-size:28px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:4px}
+.hero-value.pos{color:var(--green)}
+.hero-value.neg{color:var(--red)}
+.hero-card.c-insight .hero-value{color:#fff;font-size:14px;line-height:1.7;font-weight:400;margin-top:4px}
+.hero-sub{font-size:11px;color:var(--muted)}
+.hero-card.c-insight .hero-sub{color:rgba(255,255,255,.5);font-size:10px;margin-top:8px}
+
+/* ── TREND CHART ── */
+.chart-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.chart-title{font-size:13px;font-weight:700;color:var(--navy)}
+.chart-note{font-size:11px;color:var(--muted)}
+.top3-badge{font-size:10px;font-weight:700;background:var(--navy);color:var(--gold-light);padding:2px 8px;border-radius:10px;margin-left:auto}
+.chart-wrap{position:relative;height:240px}
+
+/* ── KEYWORD BARS ── */
+.kw-list{display:flex;flex-direction:column;gap:7px}
+.kw-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--cream);border-radius:8px;cursor:default}
+.kw-item.top3{background:var(--navy-light);border:1px solid var(--blue-border)}
+.kw-name{font-weight:700;font-size:13px;width:70px;flex-shrink:0}
+.kw-item-v2{display:block;padding:8px 12px}
+.kw-item-v2 .kw-line1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kw-item-v2 .kw-name{width:auto}
+.kw-item-v2 .kw-line2{font-size:11px;color:var(--muted);margin-top:3px;padding-left:2px}
+.status-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.status-pill .status-pct{font-weight:600;opacity:.8}
+.status-hot{background:#ffe4d6;color:#9a3412}
+.status-up{background:var(--green-bg);color:var(--green)}
+.status-flat{background:#eef0f2;color:var(--muted)}
+.status-down{background:var(--red-bg);color:var(--red)}
+.status-muted{background:#f1f1f1;color:var(--muted)}
+
+.chart-overview{background:var(--cream);border-left:3px solid var(--gold);padding:10px 14px;border-radius:6px;margin:4px 0 14px;font-size:12px;line-height:1.7}
+.co-line{color:var(--navy);font-weight:600}
+.co-line + .co-line{margin-top:2px}
+.co-line:last-child{color:var(--navy2);font-weight:700;margin-top:4px;padding-top:4px;border-top:1px dashed var(--border)}
+
+.hero-story{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.hs-trend{font-size:14px;font-weight:800}
+.hs-trend.status-hot{color:#9a3412}
+.hs-trend.status-up{color:var(--green)}
+.hs-trend.status-flat{color:var(--navy)}
+.hs-trend.status-down{color:var(--red)}
+.hs-interp{font-size:11px;color:var(--muted);font-weight:600}
+.hs-action{font-size:11px;color:var(--navy);font-weight:700}
+
+/* ── OWN PRODUCTS ── */
+.view-mode-bar{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content}
+.view-mode-btn{font-size:12px;font-weight:600;padding:6px 18px;border:none;background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+.view-mode-btn.active{background:var(--navy);color:var(--gold-light)}
+.view-mode-btn:not(:last-child){border-right:1px solid var(--border)}
+.cat-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.cat-tab{font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+.cat-tab.active{background:var(--navy);color:var(--gold-light);border-color:var(--navy)}
+.ctrl-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.sort-bar{display:flex;gap:6px;align-items:center}
+.sort-state-label{font-size:11px;color:var(--muted);margin-right:4px;white-space:nowrap}
+.sort-btn{font-size:11px;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sort-btn.active{background:var(--gold-bg);color:var(--navy);border-color:var(--gold);font-weight:700}
+.expand-ctrl{display:flex;gap:6px;align-items:center}
+.expand-btn{font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+.expand-btn:hover{background:var(--cream)}
+.series-block{margin-bottom:10px}
+.series-hdr{display:flex;align-items:center;gap:10px;background:var(--navy);color:var(--gold-light);padding:9px 16px;border-radius:8px;cursor:pointer;user-select:none}
+.series-name{font-size:13px;font-weight:700;flex:1}
+.series-count{font-size:11px;color:rgba(255,255,255,.5)}
+.series-toggle{font-size:11px;color:rgba(255,255,255,.5);transition:transform .2s;margin-left:4px}
+.series-toggle.open{transform:rotate(180deg)}
+.series-body{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+.series-body.open{display:block}
+.sku-table{width:100%;border-collapse:collapse}
+.sku-table th{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-align:left;padding:9px 14px;background:var(--cream);border-bottom:1px solid var(--border);white-space:nowrap}
+.sku-table th.r{text-align:right}
+.sku-table th.sortable{cursor:pointer;user-select:none}
+.sku-table th.sortable:hover{color:var(--navy)}
+.sku-table th.sort-asc::after{content:" ↑";color:var(--navy)}
+.sku-table th.sort-desc::after{content:" ↓";color:var(--navy)}
+.sku-table td{padding:10px 14px;border-bottom:1px solid var(--cream);vertical-align:middle;font-size:13px}
+.sku-table tr:last-child td{border-bottom:none}
+.sku-name{font-weight:600;color:var(--navy)}
+.sku-vol{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+.sku-cat{font-size:10px;background:var(--cream);color:var(--muted);padding:2px 8px;border-radius:10px;white-space:nowrap}
+.sku-series{font-size:11px;color:var(--muted)}
+.price-val{font-weight:700;text-align:right;white-space:nowrap}
+.no-val{color:var(--muted);font-size:12px;font-style:italic}
+
+/* ── COMPETITOR (v3) ── */
+.comp-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:stretch}
+.comp-block{margin:0;padding:18px 20px}
+.comp-cat-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;
+  padding-bottom:10px;border-bottom:1px solid var(--border)}
+.comp-cat-name{font-size:15px;font-weight:800;color:var(--navy)}
+.comp-our-ml{font-size:11px;color:var(--muted)}
+.comp-our-ml strong{color:var(--navy);font-weight:700}
+.comp-position{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;margin-left:auto}
+.comp-position.pos{background:var(--green-bg);color:var(--green)}
+.comp-position.mid{background:var(--cream);color:var(--muted)}
+.comp-position.neg{background:var(--red-bg);color:var(--red)}
+.comp-criteria{font-size:10px;color:var(--muted);background:var(--cream);padding:2px 9px;border-radius:10px}
+
+.sub-market{margin-top:14px}
+.sm-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.sm-label{font-size:12px;font-weight:800;color:var(--navy);display:inline-flex;align-items:center;gap:6px}
+.sm-label::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.sub-market.risk .sm-label::before{background:var(--red)}
+.sub-market.promo .sm-label::before{background:#a855f7}
+.sm-count{font-size:10px;color:var(--muted)}
+.sm-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--cream);
+  padding:9px 12px;border-radius:8px;margin-bottom:8px}
+.sub-market.risk .sm-summary{background:var(--red-bg)}
+.sm-cell{display:flex;flex-direction:column;gap:2px}
+.sm-cell-label{font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.sm-cell-value{font-size:13px;font-weight:800;color:var(--navy);line-height:1.1}
+.sm-cell-unit{font-size:9px;font-weight:500;color:var(--muted);margin-left:2px}
+
+.comp-rows{display:flex;flex-direction:column;gap:5px}
+.comp-row{display:grid;grid-template-columns:20px 1fr 70px 60px 80px;align-items:center;gap:8px;
+  padding:7px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-size:11.5px}
+.sub-market.risk .comp-row{background:#fff7f7;border-color:#fca5a5}
+.comp-rank{font-size:10px;font-weight:700;color:var(--muted);text-align:center}
+.comp-title{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comp-mall{font-size:10px;color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-mlprice{font-size:10px;color:var(--navy);font-weight:700;text-align:right;white-space:nowrap}
+.comp-price{font-weight:700;color:var(--navy);text-align:right}
+.comp-empty{font-size:11px;color:var(--muted);padding:10px;background:var(--cream);border-radius:6px;text-align:center}
+.comp-source-note{font-size:11px;color:var(--muted);margin-top:16px;padding:10px 14px;background:var(--cream);border-radius:6px;line-height:1.55}
+.comp-risk-warn{font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px}
+
+/* ── INSIGHT CARDS (4열) ── */
+.insight-grid{display:flex;flex-direction:column;gap:10px}
+.insight-card{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.insight-col{padding:12px 14px}
+.insight-col+.insight-col{border-left:1px solid var(--border)}
+.insight-col:nth-child(1){background:var(--blue-bg)}
+.insight-col:nth-child(2){background:var(--gold-bg)}
+.insight-col:nth-child(3){background:var(--cream)}
+.insight-col:nth-child(4){background:var(--green-bg)}
+.insight-col-label{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
+.insight-col:nth-child(1) .insight-col-label{color:var(--navy)}
+.insight-col:nth-child(2) .insight-col-label{color:#854d0e}
+.insight-col:nth-child(4) .insight-col-label{color:var(--green)}
+.insight-col-text{font-size:12px;line-height:1.55;color:var(--text)}
+
+/* ── PRIORITY CHECK ── */
+.priority-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.priority-card{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;background:var(--white);display:flex;align-items:center;gap:12px}
+.priority-card.warn{border-color:#fbbf24;background:#fffbeb}
+.priority-card.ok{border-color:#86efac;background:#f0fdf4}
+.priority-count{font-size:22px;font-weight:800;color:var(--navy);min-width:34px;text-align:center;line-height:1}
+.priority-card.warn .priority-count{color:#d97706}
+.priority-card.ok .priority-count{color:var(--green)}
+.priority-body{flex:1}
+.priority-label{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:2px}
+.priority-detail{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* ── BADGES ── */
+.badge-partial{display:inline-block;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:8px;margin-left:6px;white-space:nowrap}
+.chart-partial-note{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:10px;margin-left:8px}
+.badge-comp{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap;cursor:help;position:relative}
+.badge-comp.ok{background:var(--green-bg);color:var(--green)}
+.badge-comp.market_only{background:var(--amber-bg);color:#92400e}
+.badge-comp.no_match{background:var(--red-bg);color:var(--red)}
+.badge-comp.no_source{background:#f1f5f9;color:#475569}
+.badge-comp.verify{background:#ede9fe;color:#6d28d9}
+.lvl-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap}
+.lvl-ok{background:var(--green-bg);color:var(--green)}
+.lvl-mid{background:var(--amber-bg);color:var(--amber)}
+.lvl-high{background:var(--red-bg);color:var(--red)}
+.price-legend{font-size:10px;color:var(--muted);margin-top:8px;padding:6px 10px;background:var(--cream);border-radius:6px;display:inline-block}
+
+/* ── ACTION ITEMS ── */
+.action-list{display:flex;flex-direction:column;gap:8px}
+.action-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--white);border:1px solid var(--border);border-left:3px solid transparent;box-shadow:var(--shadow)}
+.action-item.h{border-left-color:var(--red)}
+.action-item.m{border-left-color:var(--gold)}
+.action-item.l{border-left-color:#94a3b8}
+.action-badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;flex-shrink:0;margin-top:1px;letter-spacing:.04em}
+.action-item.h .action-badge{background:var(--red-bg);color:var(--red)}
+.action-item.m .action-badge{background:var(--amber-bg);color:var(--amber)}
+.action-item.l .action-badge{background:var(--cream);color:var(--muted)}
+.action-body{flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.action-text{font-size:12px;line-height:1.4;flex:1;min-width:0}
+.action-deadline{font-size:11px;color:var(--muted);white-space:nowrap}
+
+.risk-list{display:flex;flex-direction:column;gap:6px}
+.risk-item{display:flex;align-items:center;gap:8px;font-size:12px;background:var(--red-bg);padding:8px 12px;border-radius:8px;color:var(--red)}
+.risk-icon{flex-shrink:0;font-size:13px}
+
+.outlook-box{background:var(--navy);border-radius:var(--radius);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.outlook-label{font-size:10px;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;font-weight:700;flex-shrink:0}
+.outlook-text{font-size:13px;color:rgba(255,255,255,.88);line-height:1.55;flex:1;min-width:200px}
+
+.fallback-card{background:var(--white);border:1px dashed var(--border);border-radius:var(--radius);padding:28px;text-align:center;color:var(--muted);font-size:13px}
+.footer{text-align:center;padding:24px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:8px}
+
+@media(max-width:780px){
+  .hero{grid-template-columns:1fr 1fr}
+  .hero-card.c-insight{grid-column:1/-1}
+  .grid2,.grid3,.comp-grid{grid-template-columns:1fr}
+  .comp-summary{grid-template-columns:repeat(2,1fr)}
+  .insight-card{grid-template-columns:1fr 1fr}
+  .insight-col:nth-child(n+3){border-top:1px solid var(--border)}
+  .insight-col:nth-child(3){border-left:none}
+  .priority-grid{grid-template-columns:1fr}
+  .hdr{flex-direction:column;padding:20px}
+}
+@media print{.info-banner{position:static}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-co">씨엠에스랩</div>
+    <div class="hdr-brand-name">셀퓨전씨</div>
+  </div>
+  <div class="hdr-center"><div class="hdr-title">선케어 마켓 모니터링</div></div>
+  <div class="hdr-right">
+    <div class="hdr-date">
+      <div class="dl">생성일시</div>
+      <div class="dv">2026-04-22 09:47</div>
+    </div>
+  </div>
+</div>
+<div class="gold-bar"></div>
+
+<!-- STICKY INFO BANNER -->
+<div class="info-banner">
+  <div class="ib-item"><strong>기간</strong> 2026-02-23 ~ 2026-04-20</div>
+  <span class="ib-sep">|</span>
+  <div class="ib-item"><strong>출처</strong> 네이버 데이터랩 + 네이버 쇼핑</div>
+  <span class="ib-sep">|</span>
+  <div class="ib-item tooltip-wrap">
+    <strong>검색 지수 기준</strong>
+    <span class="tooltip-icon">?</span>
+    <div class="tooltip-box">100 = 해당 기간 내 최고 검색량을 기준으로 정규화한 상대 지수</div>
+  </div>
+  <span class="ib-sep">|</span>
+  <div class="ib-item"><strong>경쟁사 기준</strong> 네이버 쇼핑 검색 결과 기반(연관도순 미사용, 노이즈/이상치 필터 적용)</div>
+</div>
+
+<div class="wrap">
+
+<!-- [1] HERO -->
+<div class="section">
+  <div class="hero">
+    <div class="hero-card c-blue">
+      <div class="hero-label">전주 대비 검색 지수</div>
+      
+      <div class="hero-value pos">
+        +35.9%
+      </div>
+      <div class="hero-sub">전 키워드 평균 변화율</div>
+    </div>
+
+    <div class="hero-card c-gold">
+      <div class="hero-label">최고 상승 키워드</div>
+      
+      <div class="hero-story">
+        <div class="hs-trend status-hot">자외선차단제 급등 (시즌 진입) (+111.7%)</div>
+        <div class="hs-interp">→ 시즌 진입 신호 · 수요 급증 구간</div>
+        <div class="hs-action">→ 상승 키워드 중심으로 예산/재고 우선 점검</div>
+      </div>
+      
+    </div>
+
+    <div class="hero-card c-green">
+      <div class="hero-label">모니터링 경쟁 제품</div>
+      <div class="hero-value">233<span style="font-size:16px;font-weight:400"> 개</span></div>
+      <div class="hero-sub">카테고리별 Top 5 합계</div>
+    </div>
+
+    <div class="hero-card c-insight">
+      <div class="hero-label">이번 주 핵심 인사이트</div>
+      <div class="hero-value">자외선차단제·선크림 검색 급등, 시즌 수요 확대 가능성</div>
+      <div class="hero-sub">2026-04-22 09:47 자동 생성</div>
+    </div>
+  </div>
+</div>
+
+<!-- [2] 시장 트렌드 -->
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-dot"></div>
+    <div class="sec-title">시장 트렌드</div>
+    <div class="sec-sub">검색 지수 기준 · 8주 평균 Top 3 강조</div>
+  </div>
+
+  
+  <div class="grid2">
+    <div class="card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">키워드 검색 지수 추이
+            
+            
+            <span class="chart-partial-note" title="이번 주는 집계가 완료되면 다음 리포트에 반영됩니다">● 최신 주차 데이터는 집계 완료 후 반영</span>
+            
+          </div>
+          <div class="chart-note">진한 실선 = 최근 평균 Top 3 강조</div>
+        </div>
+        <span class="top3-badge">Top 3 강조</span>
+      </div>
+      
+      <div class="chart-overview">
+        <div class="co-line">▲ 자외선차단제 급등 (+111.7%) · 시즌 진입 신호</div><div class="co-line">▲ 선크림 · 선스틱 · 선스프레이 동반 상승</div><div class="co-line">→ 선케어 전반 수요 확대 구간</div>
+      </div>
+      
+      <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px">
+        키워드별 현황
+        <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:6px">변화율 · 지수(0~100)</span>
+      </div>
+      <div class="kw-list">
+        
+        <div class="kw-item kw-item-v2 top3">
+          <div class="kw-line1">
+            <span class="kw-name">선크림<span class="badge-partial" title="최신 주차는 집계 완료 후 반영되며, 변화율은 직전 완전 주차 기준">집계 중</span></span>
+            <span class="status-pill status-up">
+              상승 (수요 확대)
+              <span class="status-pct">(+28.6%)</span>
+            </span>
+          </div>
+          <div class="kw-line2">→ 수요 확대 구간</div>
+        </div>
+        
+        <div class="kw-item kw-item-v2 top3">
+          <div class="kw-line1">
+            <span class="kw-name">선스틱<span class="badge-partial" title="최신 주차는 집계 완료 후 반영되며, 변화율은 직전 완전 주차 기준">집계 중</span></span>
+            <span class="status-pill status-up">
+              상승 (수요 확대)
+              <span class="status-pct">(+25.3%)</span>
+            </span>
+          </div>
+          <div class="kw-line2">→ 수요 확대 구간</div>
+        </div>
+        
+        <div class="kw-item kw-item-v2 top3">
+          <div class="kw-line1">
+            <span class="kw-name">선세럼<span class="badge-partial" title="최신 주차는 집계 완료 후 반영되며, 변화율은 직전 완전 주차 기준">집계 중</span></span>
+            <span class="status-pill status-flat">
+              보합
+              <span class="status-pct">(-9.7%)</span>
+            </span>
+          </div>
+          <div class="kw-line2">→ 큰 변화 없음 · 관망 구간</div>
+        </div>
+        
+        <div class="kw-item kw-item-v2 ">
+          <div class="kw-line1">
+            <span class="kw-name">선스프레이<span class="badge-partial" title="최신 주차는 집계 완료 후 반영되며, 변화율은 직전 완전 주차 기준">집계 중</span></span>
+            <span class="status-pill status-up">
+              상승 (수요 확대)
+              <span class="status-pct">(+23.7%)</span>
+            </span>
+          </div>
+          <div class="kw-line2">→ 수요 확대 구간</div>
+        </div>
+        
+        <div class="kw-item kw-item-v2 ">
+          <div class="kw-line1">
+            <span class="kw-name">자외선차단제<span class="badge-partial" title="최신 주차는 집계 완료 후 반영되며, 변화율은 직전 완전 주차 기준">집계 중</span></span>
+            <span class="status-pill status-hot">
+              급등 (시즌 진입)
+              <span class="status-pct">(+111.7%)</span>
+            </span>
+          </div>
+          <div class="kw-line2">→ 시즌 진입 신호 · 수요 급증 구간</div>
+        </div>
+        
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        진한 배경 = 8주 평균 Top 3 키워드 / 변화율 = 직전 완전 주차 대비
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<!-- [3] 자사 제품 -->
+
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-dot"></div>
+    <div class="sec-title">자사 제품 — 셀퓨전씨</div>
+    <div class="sec-sub">전체 6개 SKU · 시리즈별 그룹</div>
+  </div>
+
+  <div class="view-mode-bar">
+    <button class="view-mode-btn active" data-mode="series">라인별 보기</button>
+    <button class="view-mode-btn" data-mode="all">전체 SKU 보기</button>
+  </div>
+
+  <div class="cat-tabs" id="catTabs">
+    <button class="cat-tab active" data-cat="all">전체</button>
+    <button class="cat-tab" data-cat="선세럼">선세럼</button><button class="cat-tab" data-cat="선스프레이">선스프레이</button><button class="cat-tab" data-cat="선크림">선크림</button>
+  </div>
+
+  <div class="ctrl-bar">
+    <div class="sort-bar">
+      <span class="sort-state-label" id="sortStateLabel">정렬: 기본순</span>
+      <button class="sort-btn active" data-sort="default">기본순</button>
+      <button class="sort-btn" data-sort="price">공식가</button>
+      <button class="sort-btn" data-sort="gap">시장 괴리</button>
+      <button class="sort-btn" data-sort="comp-gap">경쟁사 대비</button>
+    </div>
+    <div class="expand-ctrl" id="expandCtrl">
+      <button class="expand-btn" onclick="expandAll()">전체 펼치기</button>
+      <button class="expand-btn" onclick="collapseAll()">전체 접기</button>
+    </div>
+  </div>
+
+  
+  
+
+  <!-- ① 라인별 보기 -->
+  <div id="seriesView">
+    
+    <div class="series-block" data-series="레이저 UV">
+      <div class="series-hdr" onclick="toggleSeries(this)">
+        <span class="series-name">레이저 UV</span>
+        <span class="series-count">2개 SKU</span>
+        <span class="series-toggle">▼</span>
+      </div>
+      <div class="series-body">
+        <table class="sku-table">
+          <thead><tr>
+            <th>제품명</th>
+            <th class="r">공식가</th>
+            <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+            <th class="r">경쟁사 기준가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 제외</span></th>
+            <th class="r">시장 괴리</th>
+            <th>경쟁사 대비</th>
+            <th>출처 상태</th>
+          </tr></thead>
+          <tbody>
+            
+    
+    
+    
+    
+    
+    
+    <tr data-original="0" data-cat="선크림" data-series="레이저 UV"
+        data-price="43000" data-gap="33910" data-comp-gap="0">
+      <td><span class="sku-name">레이저 UV 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      
+      <td class="price-val">43,000원</td>
+      <td class="price-val" style="color:var(--muted)">9,090원</td>
+      <td class="price-val" style="color:var(--muted)"><span class="no-val">—</span></td>
+      <td class="price-val">+33,910원</td>
+      <td><span class="no-val">—</span></td>
+      <td><span class="badge-comp market_only" data-desc="자사 상품만 검색됨 - 경쟁사 노출 부족">시장 최저가만 존재</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+      
+      
+      
+    
+    <tr data-original="1" data-cat="선세럼" data-series="레이저 UV"
+        data-price="17800" data-gap="0" data-comp-gap="-2680">
+      <td><span class="sku-name">레이저 UV 포어 썬 세럼 40ml</span><span class="sku-vol">40ml</span></td>
+      
+      <td class="price-val">17,800원</td>
+      <td class="price-val" style="color:var(--muted)">17,800원</td>
+      <td class="price-val" style="color:var(--muted)">20,480원</td>
+      <td class="price-val">0원</td>
+      <td><span class="lvl-badge lvl-ok">경쟁우위</span></td>
+      <td><span class="badge-comp ok" data-desc="경쟁사 데이터 정상 수집">정상</span></td>
+    </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="series-block" data-series="아쿠아티카">
+      <div class="series-hdr" onclick="toggleSeries(this)">
+        <span class="series-name">아쿠아티카</span>
+        <span class="series-count">2개 SKU</span>
+        <span class="series-toggle">▼</span>
+      </div>
+      <div class="series-body">
+        <table class="sku-table">
+          <thead><tr>
+            <th>제품명</th>
+            <th class="r">공식가</th>
+            <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+            <th class="r">경쟁사 기준가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 제외</span></th>
+            <th class="r">시장 괴리</th>
+            <th>경쟁사 대비</th>
+            <th>출처 상태</th>
+          </tr></thead>
+          <tbody>
+            
+    
+    
+    
+    
+    
+    
+    <tr data-original="0" data-cat="선크림" data-series="아쿠아티카"
+        data-price="42000" data-gap="34510" data-comp-gap="0">
+      <td><span class="sku-name">아쿠아티카 쿨링 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      
+      <td class="price-val">42,000원</td>
+      <td class="price-val" style="color:var(--muted)">7,490원</td>
+      <td class="price-val" style="color:var(--muted)"><span class="no-val">—</span></td>
+      <td class="price-val">+34,510원</td>
+      <td><span class="no-val">—</span></td>
+      <td><span class="badge-comp market_only" data-desc="자사 상품만 검색됨 - 경쟁사 노출 부족">시장 최저가만 존재</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    <tr data-original="1" data-cat="선스프레이" data-series="아쿠아티카"
+        data-price="25000" data-gap="5100" data-comp-gap="4180">
+      <td><span class="sku-name">아쿠아티카 썬 스프레이 100ml</span><span class="sku-vol">100ml</span></td>
+      
+      <td class="price-val">25,000원</td>
+      <td class="price-val" style="color:var(--muted)">19,900원</td>
+      <td class="price-val" style="color:var(--muted)">20,820원</td>
+      <td class="price-val">+5,100원</td>
+      <td><span class="lvl-badge lvl-high">고가</span></td>
+      <td><span class="badge-comp ok" data-desc="경쟁사 데이터 정상 수집">정상</span></td>
+    </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="series-block" data-series="잡티 토닝">
+      <div class="series-hdr" onclick="toggleSeries(this)">
+        <span class="series-name">잡티 토닝</span>
+        <span class="series-count">1개 SKU</span>
+        <span class="series-toggle">▼</span>
+      </div>
+      <div class="series-body">
+        <table class="sku-table">
+          <thead><tr>
+            <th>제품명</th>
+            <th class="r">공식가</th>
+            <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+            <th class="r">경쟁사 기준가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 제외</span></th>
+            <th class="r">시장 괴리</th>
+            <th>경쟁사 대비</th>
+            <th>출처 상태</th>
+          </tr></thead>
+          <tbody>
+            
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    <tr data-original="0" data-cat="선크림" data-series="잡티 토닝"
+        data-price="43500" data-gap="29400" data-comp-gap="29400">
+      <td><span class="sku-name">잡티 토닝 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      
+      <td class="price-val">43,500원</td>
+      <td class="price-val" style="color:var(--muted)">14,100원</td>
+      <td class="price-val" style="color:var(--muted)">14,100원</td>
+      <td class="price-val">+29,400원</td>
+      <td><span class="lvl-badge lvl-high">고가</span></td>
+      <td><span class="badge-comp verify" data-desc="경쟁사 가격이 공식가의 50% 미만 - 병행/비정품 가능성">검증 필요</span></td>
+    </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="series-block" data-series="더마 릴리프">
+      <div class="series-hdr" onclick="toggleSeries(this)">
+        <span class="series-name">더마 릴리프</span>
+        <span class="series-count">1개 SKU</span>
+        <span class="series-toggle">▼</span>
+      </div>
+      <div class="series-body">
+        <table class="sku-table">
+          <thead><tr>
+            <th>제품명</th>
+            <th class="r">공식가</th>
+            <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+            <th class="r">경쟁사 기준가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 제외</span></th>
+            <th class="r">시장 괴리</th>
+            <th>경쟁사 대비</th>
+            <th>출처 상태</th>
+          </tr></thead>
+          <tbody>
+            
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    <tr data-original="0" data-cat="선크림" data-series="더마 릴리프"
+        data-price="35000" data-gap="22200" data-comp-gap="22200">
+      <td><span class="sku-name">더마 릴리프 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      
+      <td class="price-val">35,000원</td>
+      <td class="price-val" style="color:var(--muted)">12,800원</td>
+      <td class="price-val" style="color:var(--muted)">12,800원</td>
+      <td class="price-val">+22,200원</td>
+      <td><span class="lvl-badge lvl-high">고가</span></td>
+      <td><span class="badge-comp verify" data-desc="경쟁사 가격이 공식가의 50% 미만 - 병행/비정품 가능성">검증 필요</span></td>
+    </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="price-legend">가격 상태 기준: 경쟁우위 (공식가 대비 -5% 이하) · 적정 (±10% 이내) · 고가 (+10% 초과)</div>
+  </div>
+
+  <!-- ② 전체 SKU 보기 -->
+  <div id="allSkuView" style="display:none">
+    <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+    <table class="sku-table">
+      <thead><tr>
+        <th class="sortable" data-col="name">제품명</th>
+        <th class="sortable" data-col="series">라인</th>
+        <th class="sortable" data-col="cat">카테고리</th>
+        <th class="r sortable" data-col="price">공식가</th>
+        <th class="r">시장 최저가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 포함</span></th>
+        <th class="r">경쟁사 기준가<br><span style="font-weight:400;color:var(--muted);font-size:9px">자사 제외</span></th>
+        <th class="r sortable" data-col="gap">시장 괴리</th>
+        <th class="sortable" data-col="comp-gap">경쟁사 대비</th>
+        <th>출처 상태</th>
+      </tr></thead>
+      <tbody>
+        
+    
+    
+    
+    
+    
+    
+    <tr data-original="0" data-cat="선크림" data-series="레이저 UV"
+        data-price="43000" data-gap="33910" data-comp-gap="0">
+      <td><span class="sku-name">레이저 UV 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      <td><span class="sku-series">레이저 UV</span></td><td><span class="sku-cat">선크림</span></td>
+      <td class="price-val">43,000원</td>
+      <td class="price-val" style="color:var(--muted)">9,090원</td>
+      <td class="price-val" style="color:var(--muted)"><span class="no-val">—</span></td>
+      <td class="price-val">+33,910원</td>
+      <td><span class="no-val">—</span></td>
+      <td><span class="badge-comp market_only" data-desc="자사 상품만 검색됨 - 경쟁사 노출 부족">시장 최저가만 존재</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+      
+      
+      
+    
+    <tr data-original="1" data-cat="선세럼" data-series="레이저 UV"
+        data-price="17800" data-gap="0" data-comp-gap="-2680">
+      <td><span class="sku-name">레이저 UV 포어 썬 세럼 40ml</span><span class="sku-vol">40ml</span></td>
+      <td><span class="sku-series">레이저 UV</span></td><td><span class="sku-cat">선세럼</span></td>
+      <td class="price-val">17,800원</td>
+      <td class="price-val" style="color:var(--muted)">17,800원</td>
+      <td class="price-val" style="color:var(--muted)">20,480원</td>
+      <td class="price-val">0원</td>
+      <td><span class="lvl-badge lvl-ok">경쟁우위</span></td>
+      <td><span class="badge-comp ok" data-desc="경쟁사 데이터 정상 수집">정상</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+    <tr data-original="2" data-cat="선크림" data-series="아쿠아티카"
+        data-price="42000" data-gap="34510" data-comp-gap="0">
+      <td><span class="sku-name">아쿠아티카 쿨링 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      <td><span class="sku-series">아쿠아티카</span></td><td><span class="sku-cat">선크림</span></td>
+      <td class="price-val">42,000원</td>
+      <td class="price-val" style="color:var(--muted)">7,490원</td>
+      <td class="price-val" style="color:var(--muted)"><span class="no-val">—</span></td>
+      <td class="price-val">+34,510원</td>
+      <td><span class="no-val">—</span></td>
+      <td><span class="badge-comp market_only" data-desc="자사 상품만 검색됨 - 경쟁사 노출 부족">시장 최저가만 존재</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    <tr data-original="3" data-cat="선스프레이" data-series="아쿠아티카"
+        data-price="25000" data-gap="5100" data-comp-gap="4180">
+      <td><span class="sku-name">아쿠아티카 썬 스프레이 100ml</span><span class="sku-vol">100ml</span></td>
+      <td><span class="sku-series">아쿠아티카</span></td><td><span class="sku-cat">선스프레이</span></td>
+      <td class="price-val">25,000원</td>
+      <td class="price-val" style="color:var(--muted)">19,900원</td>
+      <td class="price-val" style="color:var(--muted)">20,820원</td>
+      <td class="price-val">+5,100원</td>
+      <td><span class="lvl-badge lvl-high">고가</span></td>
+      <td><span class="badge-comp ok" data-desc="경쟁사 데이터 정상 수집">정상</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    <tr data-original="4" data-cat="선크림" data-series="잡티 토닝"
+        data-price="43500" data-gap="29400" data-comp-gap="29400">
+      <td><span class="sku-name">잡티 토닝 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      <td><span class="sku-series">잡티 토닝</span></td><td><span class="sku-cat">선크림</span></td>
+      <td class="price-val">43,500원</td>
+      <td class="price-val" style="color:var(--muted)">14,100원</td>
+      <td class="price-val" style="color:var(--muted)">14,100원</td>
+      <td class="price-val">+29,400원</td>
+      <td><span class="lvl-badge lvl-high">고가</span></td>
+      <td><span class="badge-comp verify" data-desc="경쟁사 가격이 공식가의 50% 미만 - 병행/비정품 가능성">검증 필요</span></td>
+    </tr>
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    <tr data-original="5" data-cat="선크림" data-series="더마 릴리프"
+        data-price="35000" data-gap="22200" data-comp-gap="22200">
+      <td><span class="sku-name">더마 릴리프 썬스크린 50ml</span><span class="sku-vol">50ml</span></td>
+      <td><span class="sku-series">더마 릴리프</span></td><td><span class="sku-cat">선크림</span></td>
+      <td class="price-val">35,000원</td>
+      <td class="price-val" style="color:var(--muted)">12,800원</td>
+      <td class="price-val" style="color:var(--muted)">12,800원</td>
+      <td class="price-val">+22,200원</td>
+      <td><span class="lvl-badge lvl-high">고가</span></td>
+      <td><span class="badge-comp verify" data-desc="경쟁사 가격이 공식가의 50% 미만 - 병행/비정품 가능성">검증 필요</span></td>
+    </tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="price-legend">가격 상태 기준: 경쟁우위 (공식가 대비 -5% 이하) · 적정 (±10% 이내) · 고가 (+10% 초과)</div>
+  </div>
+</div>
+
+
+<!-- [4] 경쟁 제품 분석 (v3: 시장 구조 + 가격 경쟁력) -->
+
+<div class="section">
+  <div class="sec-hdr">
+    <div class="sec-dot"></div>
+    <div class="sec-title">경쟁 제품 분석 · 시장 구조</div>
+    <div class="sec-sub">단품 / 행사·묶음 / 비정상 분리 · ml당 가격 기준</div>
+  </div>
+
+  
+  
+
+  <div class="comp-grid">
+    
+      
+      
+      <div class="card comp-block">
+        <div class="comp-cat-hdr">
+          <span class="comp-cat-name">선크림</span>
+          
+          <span class="comp-our-ml">자사 평균 <strong>817.5원/ml</strong></span>
+          
+          
+          
+          
+          
+          <span class="comp-position neg">단품 시장 대비 · 자사가 고가</span>
+          
+          <span class="comp-criteria">단품/행사/비정상 분리 · ml당 가격 기준</span>
+        </div>
+
+        
+    
+    <div class="sub-market single">
+      <div class="sm-hdr">
+        <span class="sm-label">단품 시장</span>
+        <span class="sm-count">21개 상품 · 19개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">532.4<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">479.4<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">29,157<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">26,690<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="일리윤 저자극 이지워시 선크림 150ml(SPF50+), 1개">일리윤 저자극 이지워시 선크림 150ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">115.3/ml</span>
+            <span class="comp-price">17,300원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="닥터지 그린 마일드 업 선크림 130ml 무기자차 올리브영 코스트코 썬크림">닥터지 그린 마일드 업 선크림 130ml 무기자차 올리브영 코스트코 썬크림</span>
+            <span class="comp-mall">다섯</span>
+            <span class="comp-mlprice">205.3/ml</span>
+            <span class="comp-price">26,690원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="헤라 선 메이트 레포츠 프로 워터프루프 70ml(SPF50+), 1개">헤라 선 메이트 레포츠 프로 워터프루프 70ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">330.4/ml</span>
+            <span class="comp-price">23,130원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="인셀덤 모이스쳐 레이어 선 프로텍터 50ml (SPF 50+), 1개">인셀덤 모이스쳐 레이어 선 프로텍터 50ml (SPF 50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">352.2/ml</span>
+            <span class="comp-price">17,610원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="샤블 내츄럴 UV 톤업 선크림 파데프리 썬크림 피부과 보습 70ml, 1개">샤블 내츄럴 UV 톤업 선크림 파데프리 썬크림 피부과 보습 70ml, 1개</span>
+            <span class="comp-mall">샤블.</span>
+            <span class="comp-mlprice">384.3/ml</span>
+            <span class="comp-price">26,900원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market promo">
+      <div class="sm-hdr">
+        <span class="sm-label">행사·묶음 시장</span>
+        <span class="sm-count">18개 상품 · 10개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">243.9<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">260.0<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">34,419<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">35,900<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="식물나라 저자극 페이스 앤 바디 대용량 선크림 150ml, 2개">식물나라 저자극 페이스 앤 바디 대용량 선크림 150ml, 2개</span>
+            <span class="comp-mall">식물나라</span>
+            <span class="comp-mlprice">83.0/ml</span>
+            <span class="comp-price">24,900원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="식물나라 뽀얀쌀 톤업 수분 선크림 100mL x 2개, SPF50+ PA++++">식물나라 뽀얀쌀 톤업 수분 선크림 100mL x 2개, SPF50+ PA++++</span>
+            <span class="comp-mall">식물나라</span>
+            <span class="comp-mlprice">104.5/ml</span>
+            <span class="comp-price">20,900원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="비오레  UV 아쿠아리치 워터리 에센스 선크림 SPF50+ 70ml, 3개">비오레  UV 아쿠아리치 워터리 에센스 선크림 SPF50+ 70ml, 3개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">114.3/ml</span>
+            <span class="comp-price">24,000원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="에스쁘아 워터 스플래쉬 선크림 세라마이드 60ml(SPF50+), 2개">에스쁘아 워터 스플래쉬 선크림 세라마이드 60ml(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">141.6/ml</span>
+            <span class="comp-price">16,990원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="메디힐 마데카소사이드 수분 선세럼 50ml(SPF50+), 2개">메디힐 마데카소사이드 수분 선세럼 50ml(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">206.0/ml</span>
+            <span class="comp-price">20,600원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market risk">
+      <div class="sm-hdr">
+        <span class="sm-label">비정상 가격 구간</span>
+        <span class="sm-count">20개 상품 · 16개 브랜드</span>
+      </div>
+      
+        
+        <div class="comp-risk-warn">⚠ 공식가 대비 -60% 이하 · 병행/비정품/유통 붕괴 가능성</div>
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">205.2<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">204.4<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">11,182<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">12,125<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="닥터지 메디 UV 울트라 선 50ml(SPF50+), 1개">닥터지 메디 UV 울트라 선 50ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">102.0/ml</span>
+            <span class="comp-price">5,100원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="닥터지 레드 블레미쉬 수딩 업 선 50ml(SPF50+), 1개">닥터지 레드 블레미쉬 수딩 업 선 50ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">121.0/ml</span>
+            <span class="comp-price">6,050원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="애터미 선크림 베이지 60ml(SPF50+), 1개">애터미 선크림 베이지 60ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">106.3/ml</span>
+            <span class="comp-price">6,380원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="애터미 선크림 화이트 60ml(SPF50+)">애터미 선크림 화이트 60ml(SPF50+)</span>
+            <span class="comp-mall">글로벌탑01</span>
+            <span class="comp-mlprice">109.8/ml</span>
+            <span class="comp-price">6,590원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="식물나라 산소수 워터프루프 선크림 100ml(SPF50+), 1개">식물나라 산소수 워터프루프 선크림 100ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">74.8/ml</span>
+            <span class="comp-price">7,480원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+      </div>
+      
+    
+      
+      
+      <div class="card comp-block">
+        <div class="comp-cat-hdr">
+          <span class="comp-cat-name">선스틱</span>
+          
+          
+          
+          
+          
+          <span class="comp-criteria">단품/행사/비정상 분리 · ml당 가격 기준</span>
+        </div>
+
+        
+    
+    <div class="sub-market single">
+      <div class="sm-hdr">
+        <span class="sm-label">단품 시장</span>
+        <span class="sm-count">16개 상품 · 14개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">1049.1<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">971.2<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">21,033<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">18,650<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="라운드랩 자작나무 수분 선스틱 19g(SPF50+), 1개">라운드랩 자작나무 수분 선스틱 19g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">821.1/ml</span>
+            <span class="comp-price">15,600원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="마녀공장 히알루론 하이드레이팅 선스틱 18g(SPF50+), 1개">마녀공장 히알루론 하이드레이팅 선스틱 18g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">827.2/ml</span>
+            <span class="comp-price">14,890원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="달바 에어 핏 프레쉬 선 스틱 19g(SPF50+), 1개">달바 에어 핏 프레쉬 선 스틱 19g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">855.3/ml</span>
+            <span class="comp-price">16,250원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="부쉬맨 워터프루프 선스틱 20g(SPF50+), 1개">부쉬맨 워터프루프 선스틱 20g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">924.5/ml</span>
+            <span class="comp-price">18,490원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="부쉬맨 워터프루프 서핑 선스틱 SPF50+ PA++++ 20g, 1개">부쉬맨 워터프루프 서핑 선스틱 SPF50+ PA++++ 20g, 1개</span>
+            <span class="comp-mall">부쉬맨</span>
+            <span class="comp-mlprice">925.0/ml</span>
+            <span class="comp-price">18,500원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market promo">
+      <div class="sm-hdr">
+        <span class="sm-label">행사·묶음 시장</span>
+        <span class="sm-count">27개 상품 · 16개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">691.4<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">604.6<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">26,075<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">24,750<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="식물나라 산소수 페이스 앤 바디 보송 선스틱 30g(SPF50+), 2개">식물나라 산소수 페이스 앤 바디 보송 선스틱 30g(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">247.8/ml</span>
+            <span class="comp-price">14,870원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="식물나라 보송 페이스 앤 바디 선스틱 30g x 2개, SPF50+ PA++++">식물나라 보송 페이스 앤 바디 선스틱 30g x 2개, SPF50+ PA++++</span>
+            <span class="comp-mall">식물나라</span>
+            <span class="comp-mlprice">313.3/ml</span>
+            <span class="comp-price">18,800원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="AHC 내추럴 퍼펙션 더블 쉴드 선스틱 22g(SPF50+), 2개">AHC 내추럴 퍼펙션 더블 쉴드 선스틱 22g(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">347.0/ml</span>
+            <span class="comp-price">15,270원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="듀이트리 어반쉐이드 쿨카밍 선스틱 20g(SPF50+), 2개">듀이트리 어반쉐이드 쿨카밍 선스틱 20g(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">365.5/ml</span>
+            <span class="comp-price">14,620원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="네이처리퍼블릭 알로에 보송 선스틱 24g(SPF50+), 2개">네이처리퍼블릭 알로에 보송 선스틱 24g(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">390.6/ml</span>
+            <span class="comp-price">18,750원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market risk">
+      <div class="sm-hdr">
+        <span class="sm-label">비정상 가격 구간</span>
+        <span class="sm-count">15개 상품 · 10개 브랜드</span>
+      </div>
+      
+        
+        <div class="comp-risk-warn">⚠ 공식가 대비 -60% 이하 · 병행/비정품/유통 붕괴 가능성</div>
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">520.2<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">469.5<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">9,982<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">9,310<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="더마블록 썬스틱 16g(SPF50+), 1개">더마블록 썬스틱 16g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">312.5/ml</span>
+            <span class="comp-price">5,000원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="AHC 내추럴 퍼펙션 더블 쉴드 선스틱 14g(SPF50+), 1개">AHC 내추럴 퍼펙션 더블 쉴드 선스틱 14g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">410.0/ml</span>
+            <span class="comp-price">5,740원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="AHC 내추럴 퍼펙션 더블 쉴드 선스틱 22g(SPF50+), 1개">AHC 내추럴 퍼펙션 더블 쉴드 선스틱 22g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">326.8/ml</span>
+            <span class="comp-price">7,190원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="조선미녀 산들쑥 선스틱 18g(SPF50+), 2개">조선미녀 산들쑥 선스틱 18g(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">472.2/ml</span>
+            <span class="comp-price">8,500원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="닥터지 그린 마일드 업 선 스틱 20g(SPF50+), 1개">닥터지 그린 마일드 업 선 스틱 20g(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">438.0/ml</span>
+            <span class="comp-price">8,760원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+      </div>
+      
+    
+      
+      
+      <div class="card comp-block">
+        <div class="comp-cat-hdr">
+          <span class="comp-cat-name">선세럼</span>
+          
+          <span class="comp-our-ml">자사 평균 <strong>445.0원/ml</strong></span>
+          
+          
+          
+          
+          
+          <span class="comp-position mid">단품 시장 대비 · 유사 수준</span>
+          
+          <span class="comp-criteria">단품/행사/비정상 분리 · ml당 가격 기준</span>
+        </div>
+
+        
+    
+    <div class="sub-market single">
+      <div class="sm-hdr">
+        <span class="sm-label">단품 시장</span>
+        <span class="sm-count">39개 상품 · 25개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">432.2<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">394.0<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">21,340<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">18,980<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="스킨1004 마다가스카르 센텔라 히알루 시카 워터핏 선 세럼 100ml((SPF50+), 1개">스킨1004 마다가스카르 센텔라 히알루 시카 워터핏 선 세럼 100ml((SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">204.7/ml</span>
+            <span class="comp-price">20,470원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="스킨1004 마다가스카르 센텔라 히알루 시카 워터핏 선 세럼 50ml, 1개">스킨1004 마다가스카르 센텔라 히알루 시카 워터핏 선 세럼 50ml, 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">218.6/ml</span>
+            <span class="comp-price">10,930원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="스킨1004 마다가스카르 센텔라 히알루 시카 워터핏 선 세럼 50ml(SPF50+), 1개">스킨1004 마다가스카르 센텔라 히알루 시카 워터핏 선 세럼 50ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">233.2/ml</span>
+            <span class="comp-price">11,660원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="이즈앤트리 히알루로닉 애시드 프레쉬 선 세럼 50ml(SPF50+), 1개">이즈앤트리 히알루로닉 애시드 프레쉬 선 세럼 50ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">267.0/ml</span>
+            <span class="comp-price">13,350원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="AHC 마스터즈 톤업 선세럼 50ml">AHC 마스터즈 톤업 선세럼 50ml</span>
+            <span class="comp-mall">AHC 공식스토어</span>
+            <span class="comp-mlprice">274.0/ml</span>
+            <span class="comp-price">13,700원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market promo">
+      <div class="sm-hdr">
+        <span class="sm-label">행사·묶음 시장</span>
+        <span class="sm-count">20개 상품 · 12개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">289.8<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">259.0<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">28,204<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">25,900<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="대용량 선크림 500ml+알로에수딩젤 백탁없는 남자 여자 바디 썬크림 톤업 수분 선세럼">대용량 선크림 500ml+알로에수딩젤 백탁없는 남자 여자 바디 썬크림 톤업 수분 선세럼</span>
+            <span class="comp-mall">에스세이지</span>
+            <span class="comp-mlprice">18.9/ml</span>
+            <span class="comp-price">18,900원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="혼합자차 대용량 선크림 60ml 4개 파데프리 바디 썬크림 눈시림 백탁 없는 선세럼 톤업">혼합자차 대용량 선크림 60ml 4개 파데프리 바디 썬크림 눈시림 백탁 없는 선세럼 톤업</span>
+            <span class="comp-mall">메이크업아이</span>
+            <span class="comp-mlprice">49.6/ml</span>
+            <span class="comp-price">11,900원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="니베아 프로텍트 앤 라이트 필 퍼펙트 선 세럼 90ml(SPF50+), 2개">니베아 프로텍트 앤 라이트 필 퍼펙트 선 세럼 90ml(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">75.5/ml</span>
+            <span class="comp-price">13,590원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="바세린 선크림 대용량 스포츠 바디 수분 썬크림 톤업 선세럼 50ml, 2개">바세린 선크림 대용량 스포츠 바디 수분 썬크림 톤업 선세럼 50ml, 2개</span>
+            <span class="comp-mall">에스세이지</span>
+            <span class="comp-mlprice">129.0/ml</span>
+            <span class="comp-price">12,900원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="이니스프리 그린티 히알루론산 수분 선세럼 50ml(SPF50+), 2개">이니스프리 그린티 히알루론산 수분 선세럼 50ml(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">198.0/ml</span>
+            <span class="comp-price">19,800원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market risk">
+      <div class="sm-hdr">
+        <span class="sm-label">비정상 가격 구간</span>
+        <span class="sm-count">0개 상품 · 0개 브랜드</span>
+      </div>
+      
+        <div class="comp-empty">비정상 가격 상품 감지 안됨</div>
+      
+    </div>
+      </div>
+      
+    
+      
+      
+      <div class="card comp-block">
+        <div class="comp-cat-hdr">
+          <span class="comp-cat-name">선스프레이</span>
+          
+          <span class="comp-our-ml">자사 평균 <strong>250.0원/ml</strong></span>
+          
+          
+          
+          
+          
+          
+          <span class="comp-position pos">단품 시장 대비 · 자사가 저가</span>
+          
+          <span class="comp-criteria">단품/행사/비정상 분리 · ml당 가격 기준</span>
+        </div>
+
+        
+    
+    <div class="sub-market single">
+      <div class="sm-hdr">
+        <span class="sm-label">단품 시장</span>
+        <span class="sm-count">23개 상품 · 18개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">287.8<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">244.5<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">17,396<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">13,990<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="바나나보트 울트라 스포츠 선스프레이 170ml(SPF100), 1개">바나나보트 울트라 스포츠 선스프레이 170ml(SPF100), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">81.0/ml</span>
+            <span class="comp-price">13,770원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="피토 워터 디펜서 선스프레이 150ml (SPF50+), 1개">피토 워터 디펜서 선스프레이 150ml (SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">85.3/ml</span>
+            <span class="comp-price">12,800원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="레시피 워터프루프 선 스프레이 SPF50+ 80ml, 1개">레시피 워터프루프 선 스프레이 SPF50+ 80ml, 1개</span>
+            <span class="comp-mall">단미씨</span>
+            <span class="comp-mlprice">162.5/ml</span>
+            <span class="comp-price">13,000원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="메디힐 수분 유브이컷 선 스프레이 60ml(SPF50+), 1개">메디힐 수분 유브이컷 선 스프레이 60ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">230.0/ml</span>
+            <span class="comp-price">13,800원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="아넷사 퍼펙트 유브이 선스크린 스킨케어 스프레이 60ml(SPF50+), 1개">아넷사 퍼펙트 유브이 선스크린 스킨케어 스프레이 60ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">233.2/ml</span>
+            <span class="comp-price">13,990원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market promo">
+      <div class="sm-hdr">
+        <span class="sm-label">행사·묶음 시장</span>
+        <span class="sm-count">28개 상품 · 14개 브랜드</span>
+      </div>
+      
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">122.9<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">94.4<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">24,923<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">21,850<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="닥터아토 쿨링 선스프레이 150ml(SPF50+), 2개">닥터아토 쿨링 선스프레이 150ml(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">45.2/ml</span>
+            <span class="comp-price">13,570원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="닥터아토 쿨링 선스프레이 150mL X 2 뿌리는 선크림 썬미스트 자외선 차단">닥터아토 쿨링 선스프레이 150mL X 2 뿌리는 선크림 썬미스트 자외선 차단</span>
+            <span class="comp-mall">코코링크</span>
+            <span class="comp-mlprice">56.8/ml</span>
+            <span class="comp-price">17,050원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="1+1 닥터 아토 쿨링 선 스프레이 150ml 2개 바디 뿌리는 썬스프레이 골프 등산">1+1 닥터 아토 쿨링 선 스프레이 150ml 2개 바디 뿌리는 썬스프레이 골프 등산</span>
+            <span class="comp-mall">코코장수몰</span>
+            <span class="comp-mlprice">57.6/ml</span>
+            <span class="comp-price">17,290원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="닥터아토 카밍 쿨링 선스프레이 150ml 3입">닥터아토 카밍 쿨링 선스프레이 150ml 3입</span>
+            <span class="comp-mall">코스트레이더</span>
+            <span class="comp-mlprice">64.4/ml</span>
+            <span class="comp-price">28,990원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="식물나라 워터프루프 선 스프레이 100mL x 2개, SPF50+ PA++++">식물나라 워터프루프 선 스프레이 100mL x 2개, SPF50+ PA++++</span>
+            <span class="comp-mall">식물나라</span>
+            <span class="comp-mlprice">66.0/ml</span>
+            <span class="comp-price">13,200원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+        
+    
+    <div class="sub-market risk">
+      <div class="sm-hdr">
+        <span class="sm-label">비정상 가격 구간</span>
+        <span class="sm-count">6개 상품 · 3개 브랜드</span>
+      </div>
+      
+        
+        <div class="comp-risk-warn">⚠ 공식가 대비 -60% 이하 · 병행/비정품/유통 붕괴 가능성</div>
+        
+        <div class="sm-summary">
+          <div class="sm-cell"><div class="sm-cell-label">평균 ml당</div>
+            <div class="sm-cell-value">60.6<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙 ml당</div>
+            <div class="sm-cell-value">59.9<span class="sm-cell-unit">원/ml</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">평균가</div>
+            <div class="sm-cell-value">7,503<span class="sm-cell-unit">원</span></div></div>
+          <div class="sm-cell"><div class="sm-cell-label">중앙가</div>
+            <div class="sm-cell-value">7,885<span class="sm-cell-unit">원</span></div></div>
+        </div>
+        <div class="comp-rows">
+          
+          <div class="comp-row">
+            <span class="comp-rank">1</span>
+            <span class="comp-title" title="제이엠솔루션 윤광 플라워 선 스프레이 로즈 180ml(SPF50+), 1개">제이엠솔루션 윤광 플라워 선 스프레이 로즈 180ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">31.7/ml</span>
+            <span class="comp-price">5,700원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">2</span>
+            <span class="comp-title" title="식물나라 제주 알로에 쿨링 선 스프레이 100ml(SPF50+), 1개">식물나라 제주 알로에 쿨링 선 스프레이 100ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">59.9/ml</span>
+            <span class="comp-price">5,990원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">3</span>
+            <span class="comp-title" title="식물나라 산소수 워터프루프 선 스프레이 100ml(SPF50+), 1개">식물나라 산소수 워터프루프 선 스프레이 100ml(SPF50+), 1개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">78.7/ml</span>
+            <span class="comp-price">7,870원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">4</span>
+            <span class="comp-title" title="제이엠솔루션 청광 마린 진주 선스프레이 펄 180ml(SPF50+), 2개">제이엠솔루션 청광 마린 진주 선스프레이 펄 180ml(SPF50+), 2개</span>
+            <span class="comp-mall">네이버</span>
+            <span class="comp-mlprice">43.9/ml</span>
+            <span class="comp-price">7,900원</span>
+          </div>
+          
+          <div class="comp-row">
+            <span class="comp-rank">5</span>
+            <span class="comp-title" title="UV 차단 스프레이 미백썬크림 얼굴 뿌리는 썬크림">UV 차단 스프레이 미백썬크림 얼굴 뿌리는 썬크림</span>
+            <span class="comp-mall">11번가</span>
+            <span class="comp-mlprice">—</span>
+            <span class="comp-price">8,660원</span>
+          </div>
+          
+        </div>
+      
+    </div>
+      </div>
+      
+    
+  </div>
+  <div class="comp-source-note">
+    ※ 네이버 쇼핑 검색 결과 기반 · 연관도순 미사용<br>
+    ※ <strong>단품</strong>: 기본 SKU 1개 · <strong>행사·묶음</strong>: 1+1/증정/N개/세트/리필 등 (총 용량 기준 ml당 가격 환산) · <strong>비정상</strong>: 자사 공식가 대비 -60% 이하 (병행/비정품 의심 구간 — 비교에서 제외)
+  </div>
+</div>
+
+
+<!-- [5] 우선 확인 필요 -->
+
+<div class="section">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">우선 확인 필요</div></div>
+  <div class="priority-grid">
+    
+    <div class="priority-card ok">
+      <div class="priority-count">0</div>
+      <div class="priority-body">
+        <div class="priority-label">데이터 공백</div>
+        <div class="priority-detail">모든 SKU 데이터 수집 완료</div>
+      </div>
+    </div>
+    
+    <div class="priority-card warn">
+      <div class="priority-count">4</div>
+      <div class="priority-body">
+        <div class="priority-label">경쟁사 미확인</div>
+        <div class="priority-detail">4개 SKU 경쟁사 상태 점검 필요</div>
+      </div>
+    </div>
+    
+    <div class="priority-card warn">
+      <div class="priority-count">1</div>
+      <div class="priority-body">
+        <div class="priority-label">광고 미연동</div>
+        <div class="priority-detail">광고 데이터는 현재 미연동 상태로 광고 기반 판단은 제외</div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+
+<!-- [6] 핵심 인사이트 Top 3 -->
+
+<div class="section">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">핵심 인사이트 Top 3</div></div>
+  <div class="insight-grid">
+    
+    <div class="insight-card">
+      <div class="insight-col"><div class="insight-col-label">데이터 변화</div><div class="insight-col-text">자외선차단제 검색지수 +111.7%, 8주 평균 대비 약 3배</div></div>
+      <div class="insight-col"><div class="insight-col-label">해석 (가능성)</div><div class="insight-col-text">시즌 수요 본격화로 카테고리 유입 확대 가능성</div></div>
+      <div class="insight-col"><div class="insight-col-label">추가 확인 필요</div><div class="insight-col-text">실제 전환율·매출 연동 여부 확인 필요</div></div>
+      <div class="insight-col"><div class="insight-col-label">액션</div><div class="insight-col-text">선크림 라인 노출 강화 검토</div></div>
+    </div>
+    
+    <div class="insight-card">
+      <div class="insight-col"><div class="insight-col-label">데이터 변화</div><div class="insight-col-text">레이저UV·아쿠아티카 썬크림 market_min이 자사가 대비 50~80% 낮음</div></div>
+      <div class="insight-col"><div class="insight-col-label">해석 (가능성)</div><div class="insight-col-text">비공식 저가 유통 존재 가능성, 가격 신뢰도 훼손 시그널</div></div>
+      <div class="insight-col"><div class="insight-col-label">추가 확인 필요</div><div class="insight-col-text">비공식 유통 채널 점검 필요</div></div>
+      <div class="insight-col"><div class="insight-col-label">액션</div><div class="insight-col-text">market_only 2개 SKU 채널 점검</div></div>
+    </div>
+    
+    <div class="insight-card">
+      <div class="insight-col"><div class="insight-col-label">데이터 변화</div><div class="insight-col-text">잡티 토닝·더마 릴리프, gap 각 29,400원·22,200원</div></div>
+      <div class="insight-col"><div class="insight-col-label">해석 (가능성)</div><div class="insight-col-text">경쟁사 대비 고가 포지션, 이탈 가능성 존재</div></div>
+      <div class="insight-col"><div class="insight-col-label">추가 확인 필요</div><div class="insight-col-text">verify 2개 SKU 매칭 정확성 확인 필요</div></div>
+      <div class="insight-col"><div class="insight-col-label">액션</div><div class="insight-col-text">가격 경쟁력 검토 우선 착수</div></div>
+    </div>
+    
+  </div>
+</div>
+
+
+<!-- [7] 즉시 액션 + 리스크 -->
+
+<div class="section">
+  <div class="grid2">
+    
+    <div>
+      <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">즉시 액션</div></div>
+      <div class="action-list">
+        
+          
+          
+          
+        <div class="action-item h">
+          <span class="action-badge">높음</span>
+          <div class="action-body">
+            <div class="action-text">비공식 유통 채널 점검 요청</div>
+            <div class="action-deadline">1주 이내</div>
+          </div>
+        </div>
+        
+          
+          
+          
+        <div class="action-item h">
+          <span class="action-badge">높음</span>
+          <div class="action-body">
+            <div class="action-text">선크림·선스틱 광고 입찰 강화</div>
+            <div class="action-deadline">즉시</div>
+          </div>
+        </div>
+        
+          
+          
+          
+        <div class="action-item m">
+          <span class="action-badge">중간</span>
+          <div class="action-body">
+            <div class="action-text">고가격 gap SKU 가격 정책 검토</div>
+            <div class="action-deadline">2주 이내</div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+
+    
+    <div>
+      <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">리스크</div></div>
+      <div class="risk-list">
+        
+        <div class="risk-item"><span class="risk-icon">⚠</span><span>비공식 저가 유통으로 가격 신뢰도 훼손 가능성</span></div>
+        
+        <div class="risk-item"><span class="risk-icon">⚠</span><span>선세럼 검색 하락, 해당 라인 수요 약화 시그널</span></div>
+        
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+
+<!-- [8] 시장 전망 -->
+
+<div class="section">
+  <div class="outlook-box">
+    <div class="outlook-label">시장 전망</div>
+    <div class="outlook-text">선크림·자외선차단제 중심 시즌 수요 확대 가능성이 높아 보임. 다만 저가 유통 채널 점검 없이는 수익성 개선 효과가 제한될 수 있음.</div>
+  </div>
+</div>
+
+
+</div><!-- /wrap -->
+
+<div class="footer">
+  <strong>씨엠에스랩 · 셀퓨전씨</strong> &nbsp;|&nbsp;
+  선케어 AI 마켓 인텔리전스 &nbsp;|&nbsp;
+  Powered by Claude AI &amp; 네이버 데이터랩/쇼핑 &nbsp;|&nbsp;
+  2026-04-22 09:47 자동 생성
+</div>
+
+
+<script>
+(function(){
+  const raw = {"labels": ["2026-02-23", "2026-03-02", "2026-03-09", "2026-03-16", "2026-03-23", "2026-03-30", "2026-04-06", "2026-04-13"], "datasets": [{"label": "선크림", "data": [53.19213, 55.05922, 60.08833, 66.52278, 75.19574, 76.43043, 77.77554, 100], "borderColor": "#c09a5a", "backgroundColor": "rgba(192,154,90,0.08)", "tension": 0.4, "fill": false, "borderWidth": 2.5, "borderDash": [], "pointRadius": 3, "order": 0, "spanGaps": true}, {"label": "선스틱", "data": [15.1074, 19.39369, 24.54326, 29.46195, 38.5264, 43.62577, 49.82935, 62.42722], "borderColor": "#1b2c4f", "backgroundColor": "rgba(27,44,79,0.08)", "tension": 0.4, "fill": false, "borderWidth": 2.5, "borderDash": [], "pointRadius": 3, "order": 0, "spanGaps": true}, {"label": "선세럼", "data": [9.54627, 9.70688, 11.70447, 11.31298, 14.27424, 16.81389, 18.54045, 16.74362], "borderColor": "#e05c7a", "backgroundColor": "rgba(224,92,122,0.08)", "tension": 0.4, "fill": false, "borderWidth": 2.5, "borderDash": [], "pointRadius": 3, "order": 0, "spanGaps": true}, {"label": "선스프레이", "data": [3.05159, 3.45312, 4.15579, 4.83838, 10.95161, 13.49126, 10.41959, 12.88897], "borderColor": "#2d9c8a", "backgroundColor": "rgba(45,156,138,0.08)", "tension": 0.4, "fill": false, "borderWidth": 1.2, "borderDash": [5, 4], "pointRadius": 1, "order": 1, "spanGaps": true}, {"label": "자외선차단제", "data": [5.05922, 7.57879, 6.58502, 7.62899, 7.77956, 7.43826, 15.22786, 32.24252], "borderColor": "#c0601a", "backgroundColor": "rgba(192,96,26,0.08)", "tension": 0.4, "fill": false, "borderWidth": 1.2, "borderDash": [5, 4], "pointRadius": 1, "order": 1, "spanGaps": true}], "top3_keywords": ["선크림", "선세럼", "선스틱"], "has_partial_tail": true};
+  const top3 = ["선크림", "선세럼", "선스틱"];
+
+  raw.datasets.forEach(ds => { ds.borderOpacity = top3.includes(ds.label) ? 1 : 0.18; });
+
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: raw,
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font:{size:11}, padding:12, usePointStyle:true, pointStyleWidth:8,
+            generateLabels(chart) {
+              return Chart.defaults.plugins.legend.labels.generateLabels(chart).map(item => {
+                item.fontColor = top3.includes(item.text) ? '#1b2c4f' : '#a0aab4';
+                return item;
+              });
+            }
+          },
+          onClick(e, item, legend) {
+            const ci = legend.chart;
+            const meta = ci.getDatasetMeta(item.datasetIndex);
+            meta.hidden = !meta.hidden;
+            ci.update();
+          }
+        },
+        tooltip: { mode:'index', intersect:false, callbacks:{ label: c => ` ${c.dataset.label}: ${c.parsed.y}` } }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:10},color:'#7a8499',maxTicksLimit:6} },
+        y: { grid:{color:'#f0ede8'}, ticks:{font:{size:10},color:'#7a8499'},
+             title:{display:true,text:'검색 지수 (0~100)',font:{size:10},color:'#7a8499'} }
+      },
+      interaction: { mode:'nearest', axis:'x', intersect:false }
+    },
+    plugins: [{
+      id:'dimmer',
+      beforeDatasetDraw(chart, args) {
+        const label = chart.data.datasets[args.index].label;
+        const alpha = top3.includes(label) ? 1 : 0.18;
+        const meta = chart.getDatasetMeta(args.index);
+        if (!meta.hidden) {
+          args.meta.dataset.options.borderColor = hexAlpha(chart.data.datasets[args.index].borderColor, alpha);
+        }
+      }
+    }]
+  });
+
+  function hexAlpha(hex, alpha) {
+    if (hex.startsWith('#')) {
+      const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    return hex;
+  }
+})();
+</script>
+
+
+<script>
+const ownState = { view: 'series', cat: 'all', sort: 'default', dir: 'asc' };
+
+function toggleSeries(hdr) {
+  const body = hdr.nextElementSibling;
+  const icon = hdr.querySelector('.series-toggle');
+  const isOpen = body.classList.toggle('open');
+  icon.classList.toggle('open', isOpen);
+}
+function expandAll() {
+  document.querySelectorAll('#seriesView .series-body').forEach(b => b.classList.add('open'));
+  document.querySelectorAll('#seriesView .series-toggle').forEach(i => i.classList.add('open'));
+}
+function collapseAll() {
+  document.querySelectorAll('#seriesView .series-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('#seriesView .series-toggle').forEach(i => i.classList.remove('open'));
+}
+
+document.querySelectorAll('.view-mode-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    ownState.view = this.dataset.mode;
+    document.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const sv = document.getElementById('seriesView');
+    const av = document.getElementById('allSkuView');
+    const ec = document.getElementById('expandCtrl');
+    if (sv) sv.style.display = ownState.view === 'series' ? '' : 'none';
+    if (av) av.style.display = ownState.view === 'all'    ? '' : 'none';
+    if (ec) ec.style.display = ownState.view === 'series' ? '' : 'none';
+    applyFilter();
+  });
+});
+
+document.querySelectorAll('#catTabs .cat-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#catTabs .cat-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    ownState.cat = this.dataset.cat;
+    applyFilter();
+  });
+});
+
+function applyFilter() {
+  const cat = ownState.cat;
+  document.querySelectorAll('#seriesView .sku-table tbody tr, #allSkuView .sku-table tbody tr').forEach(row => {
+    row.style.display = (cat === 'all' || row.dataset.cat === cat) ? '' : 'none';
+  });
+  document.querySelectorAll('#seriesView .series-block').forEach(block => {
+    const hasVisible = [...block.querySelectorAll('tbody tr')].some(r => r.style.display !== 'none');
+    block.style.display = hasVisible ? '' : 'none';
+  });
+  ['seriesView','allSkuView'].forEach(id => {
+    const container = document.getElementById(id);
+    if (!container || container.style.display === 'none') return;
+    const hasVisible = [...container.querySelectorAll('tbody tr')].some(r => r.style.display !== 'none');
+    let ph = container.querySelector('.empty-cat-ph');
+    if (!hasVisible && cat !== 'all') {
+      if (!ph) {
+        ph = document.createElement('div');
+        ph.className = 'empty-cat-ph';
+        ph.style.cssText = 'padding:24px;text-align:center;color:var(--muted);background:var(--cream);border:1px dashed var(--border);border-radius:10px;margin-top:12px;font-size:13px';
+        ph.textContent = '해당 카테고리 SKU 없음';
+        container.appendChild(ph);
+      }
+      ph.style.display = '';
+    } else if (ph) {
+      ph.style.display = 'none';
+    }
+  });
+  applySort();
+}
+
+function rowVal(row, col) {
+  if (col === 'default') return parseInt(row.dataset.original) || 0;
+  if (col === 'price')   return parseFloat(row.dataset.price)   || 0;
+  if (col === 'gap')     return parseFloat(row.dataset.gap)     || 0;
+  if (col === 'comp-gap') return parseFloat(row.dataset.compGap) || 0;
+  return 0;
+}
+
+function sortTbody(tbody) {
+  const { sort, dir } = ownState;
+  const rows = [...tbody.querySelectorAll('tr')];
+  rows.sort((a, b) => {
+    const va = rowVal(a, sort), vb = rowVal(b, sort);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+function applySort() {
+  if (ownState.view === 'series') {
+    document.querySelectorAll('#seriesView .sku-table tbody').forEach(sortTbody);
+  } else {
+    const tbody = document.querySelector('#allSkuView .sku-table tbody');
+    if (tbody) sortTbody(tbody);
+  }
+}
+
+function updateSortUI() {
+  const names = { default: '기본순', price: '공식가', gap: '시장 괴리', 'comp-gap': '경쟁사 대비' };
+  const arrow = ownState.dir === 'asc' ? ' ↑' : ' ↓';
+  document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
+    const col = btn.dataset.sort;
+    btn.classList.toggle('active', col === ownState.sort);
+    btn.textContent = names[col] + (col === ownState.sort && col !== 'default' ? arrow : '');
+  });
+  const label = ownState.sort === 'default' ? '기본순' : names[ownState.sort] + arrow;
+  const el = document.getElementById('sortStateLabel');
+  if (el) el.textContent = '정렬: ' + label;
+}
+
+document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const col = this.dataset.sort;
+    if (col === 'default') { ownState.sort = 'default'; ownState.dir = 'asc'; }
+    else if (ownState.sort === col) { ownState.dir = ownState.dir === 'asc' ? 'desc' : 'asc'; }
+    else { ownState.sort = col; ownState.dir = 'asc'; }
+    updateSortUI();
+    applySort();
+  });
+});
+
+document.querySelectorAll('#allSkuView .sku-table th.sortable').forEach(th => {
+  th.addEventListener('click', function() {
+    const col = this.dataset.col;
+    const colMap = { price: 'price', gap: 'gap', 'comp-gap': 'comp-gap', name: 'default', series: 'default', cat: 'default' };
+    const mapped = colMap[col] || 'default';
+    if (ownState.sort === mapped && mapped !== 'default') {
+      ownState.dir = ownState.dir === 'asc' ? 'desc' : 'asc';
+    } else { ownState.sort = mapped; ownState.dir = 'asc'; }
+    document.querySelectorAll('#allSkuView .sku-table th').forEach(h => h.classList.remove('sort-asc','sort-desc'));
+    if (mapped !== 'default') this.classList.add(ownState.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+    updateSortUI();
+    applySort();
+  });
+});
+</script>
+</body>
+</html>

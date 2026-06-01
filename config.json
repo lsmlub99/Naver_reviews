@@ -1,0 +1,167 @@
+{
+  "report_title": "선케어 마켓 모니터링",
+  "company_name": "씨엠에스랩",
+  "brand_name": "셀퓨전씨",
+  "our_brand_keyword": "셀퓨전씨",
+  "exclude_keywords": ["다이소", "DAISO"],
+  "exclude_brands": ["더마블록", "다이소", "DAISO", "no brand", "nobrand"],
+  "competitor_brands": [
+    "닥터지", "Dr.G", "라로슈포제", "AHC", "달바", "d'alba",
+    "이니스프리", "innisfree", "비오레", "Biore", "라운드랩", "roundlab",
+    "아누아", "anua", "코스알엑스", "COSRX", "스킨1004", "skin1004"
+  ],
+  "competitor_brand_aliases": [
+    ["닥터지", "Dr.G"],
+    ["라로슈포제", "La Roche-Posay"],
+    ["달바", "d'alba"],
+    ["이니스프리", "innisfree"],
+    ["비오레", "Biore"],
+    ["라운드랩", "roundlab"],
+    ["아누아", "anua"],
+    ["코스알엑스", "COSRX"],
+    ["스킨1004", "skin1004"]
+  ],
+
+  "keywords": ["선크림", "선스틱", "선세럼", "선스프레이", "자외선차단제"],
+
+  "products": [
+    {
+      "series": "레이저 UV",
+      "skus": [
+        {
+          "name": "레이저 UV 썬스크린 50ml",
+          "search_query": "셀퓨전씨 레이저 UV 썬스크린",
+          "own_query": "셀퓨전씨 레이저 UV 썬스크린",
+          "market_query": "선크림 SPF50 50ml",
+          "official_price": 43000,
+          "our_price": 43000,
+          "category": "선크림",
+          "volume": "50ml",
+          "status": "active"
+        },
+        {
+          "name": "레이저 UV 포어 썬 세럼 40ml",
+          "search_query": "셀퓨전씨 레이저 UV 포어 썬 세럼",
+          "own_query": "셀퓨전씨 레이저 UV 포어 썬 세럼",
+          "market_query": "선세럼 SPF50 40ml",
+          "official_price": 17800,
+          "our_price": 17800,
+          "category": "선세럼",
+          "volume": "40ml",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "series": "아쿠아티카",
+      "skus": [
+        {
+          "name": "아쿠아티카 쿨링 썬스크린 50ml",
+          "search_query": "셀퓨전씨 아쿠아티카 썬스크린",
+          "own_query": "셀퓨전씨 아쿠아티카 썬스크린",
+          "market_query": "수분 선크림 SPF50 50ml",
+          "official_price": 42000,
+          "our_price": 42000,
+          "category": "선크림",
+          "volume": "50ml",
+          "status": "active"
+        },
+        {
+          "name": "아쿠아티카 썬 스프레이 100ml",
+          "search_query": "셀퓨전씨 아쿠아티카 스프레이",
+          "own_query": "셀퓨전씨 아쿠아티카 스프레이",
+          "market_query": "선스프레이 SPF50 100ml",
+          "official_price": 25000,
+          "our_price": 25000,
+          "category": "선스프레이",
+          "volume": "100ml",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "series": "잡티 토닝",
+      "skus": [
+        {
+          "name": "잡티 토닝 썬스크린 50ml",
+          "search_query": "셀퓨전씨 잡티 토닝 썬스크린",
+          "own_query": "셀퓨전씨 잡티 토닝 썬스크린",
+          "market_query": "톤업 선크림 SPF50 50ml",
+          "official_price": 43500,
+          "our_price": 43500,
+          "category": "선크림",
+          "volume": "50ml",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "series": "더마 릴리프",
+      "skus": [
+        {
+          "name": "더마 릴리프 썬스크린 50ml",
+          "search_query": "셀퓨전씨 더마 릴리프 썬스크린",
+          "own_query": "셀퓨전씨 더마 릴리프 썬스크린",
+          "market_query": "민감성 선크림 SPF50 50ml",
+          "official_price": 35000,
+          "our_price": 35000,
+          "category": "선크림",
+          "volume": "50ml",
+          "status": "active"
+        }
+      ]
+    }
+  ],
+
+  "category_volume_ranges": {
+    "선크림":    {"min_ml": 30,  "max_ml": 100},
+    "선스틱":    {"min_ml": 10,  "max_ml": 30},
+    "선세럼":    {"min_ml": 30,  "max_ml": 60},
+    "선스프레이": {"min_ml": 80, "max_ml": 250}
+  },
+
+  "single_min_samples": 5,
+
+  "market_query_templates": {
+    "선크림":    ["선크림 SPF50", "민감성 선크림", "수분 선크림"],
+    "선스틱":    ["선스틱 SPF50", "투명 선스틱"],
+    "선세럼":    ["선세럼 SPF50", "수분 선세럼"],
+    "선스프레이": ["선스프레이 SPF50", "쿨링 선스프레이"]
+  },
+
+  "category_price_rules": {
+    "선크림":    {"abs_min": 5000, "abs_max": 120000},
+    "선스틱":    {"abs_min": 3000, "abs_max": 80000},
+    "선세럼":    {"abs_min": 5000, "abs_max": 100000},
+    "선스프레이": {"abs_min": 5000, "abs_max": 80000}
+  },
+
+  "abnormal_rules": {
+    "own_ref_threshold": 0.4,
+    "ml_p25_threshold":  0.5
+  },
+
+  "competitor_searches": [
+    {"query": "선크림", "category": "선크림"},
+    {"query": "선스틱", "category": "선스틱"},
+    {"query": "선세럼", "category": "선세럼"},
+    {"query": "선스프레이", "category": "선스프레이"}
+  ],
+
+  "display": {
+    "competitor_top_n": 5
+  },
+
+  "own_series_map": {
+    "레이저 UV":   "레이저 UV",
+    "아쿠아티카":  "아쿠아티카",
+    "잡티 토닝":   "잡티 토닝",
+    "더마 릴리프": "더마 릴리프"
+  },
+
+  "naver_shopping": {
+    "items_per_product": 6,
+    "competitor_items": 10,
+    "own_discovery_items": 40
+  }
+}
